@@ -29,6 +29,7 @@
                         <Button Grid.Column="1"
                                 Text="Photo"
                                 Clicked="OnTakePhotoClicked"
+                                SemanticProperties.Description="Capture food photo"
                                 SemanticProperties.Hint="Open the camera to capture a food image" />
                     </Grid>
                     <Border StrokeThickness="0"
@@ -52,6 +53,7 @@
                                 Text="Read"
                                 IsEnabled="False"
                                 Clicked="OnReadPredictionClicked"
+                                SemanticProperties.Description="Read food recognition result"
                                 SemanticProperties.Hint="Read the latest food recognition result aloud" />
                     </Grid>
                 </VerticalStackLayout>
@@ -69,16 +71,19 @@
                                 Background="{StaticResource FreshBrush}"
                                 TextColor="{AppThemeBinding Light={StaticResource TextPrimaryL}, Dark={StaticResource BgBase}}"
                                 Clicked="OnGetLocationClicked"
+                                SemanticProperties.Description="Locate meal"
                                 SemanticProperties.Hint="Use location to record the meal place" />
                     </Grid>
                     <Label x:Name="LocationLabel"
                            Grid.Row="1"
                            Text="Location has not been captured yet."
-                           Style="{StaticResource BodyText}" />
+                           Style="{StaticResource BodyText}"
+                           SemanticProperties.Description="Meal location" />
                     <Label x:Name="CoordinateLabel"
                            Grid.Row="2"
                            Text="Coordinates will appear here."
-                           Style="{StaticResource TelemetryText}" />
+                           Style="{StaticResource TelemetryText}"
+                           SemanticProperties.Description="Meal coordinates" />
                 </Grid>
             </Border>
 
@@ -197,6 +202,7 @@
             <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                 <Button Text="Read help"
                         Clicked="OnReadHelpClicked"
+                        SemanticProperties.Description="Read hardware help"
                         SemanticProperties.Hint="Read the help text aloud" />
                 <Button Grid.Column="1"
                         Text="Stop speech"
@@ -205,6 +211,7 @@
                         BorderWidth="1"
                         TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentB}}"
                         Clicked="OnStopSpeechClicked"
+                        SemanticProperties.Description="Stop speech"
                         SemanticProperties.Hint="Stop current speech" />
             </Grid>
 
@@ -214,6 +221,7 @@
                     BorderWidth="1"
                     TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentB}}"
                     Clicked="OnFeedbackClicked"
+                    SemanticProperties.Description="Haptic feedback"
                     SemanticProperties.Hint="Trigger vibration and haptic feedback" />
 
             <Border StrokeThickness="1"
@@ -227,10 +235,12 @@
                     <Label x:Name="HardwareStatusLabel"
                            Text="Ready."
                            FontAttributes="Bold"
-                           TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentB}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentB}}"
+                           SemanticProperties.Description="Hardware status" />
                     <Label x:Name="FeedbackCountLabel"
                            Text="Haptic feedback tests: 0"
-                           Style="{StaticResource TelemetryText}" />
+                           Style="{StaticResource TelemetryText}"
+                           SemanticProperties.Description="Haptic feedback test count" />
                 </VerticalStackLayout>
             </Border>
         </VerticalStackLayout>

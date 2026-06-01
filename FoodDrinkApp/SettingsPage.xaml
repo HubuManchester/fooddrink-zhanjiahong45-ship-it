@@ -29,6 +29,7 @@
                                 Grid.Row="1"
                                 Title="Choose app theme"
                                 SelectedIndexChanged="OnThemeChanged"
+                                SemanticProperties.Description="Theme mode"
                                 SemanticProperties.Hint="Switch between system, light, and dark theme">
                             <Picker.Items>
                                 <x:String>Use system theme</x:String>
@@ -76,17 +77,20 @@
                     <Label x:Name="LargeTextPreviewTitle"
                            Text="Large text preview"
                            Style="{StaticResource TitleText}"
-                           TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentB}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentB}}"
+                           SemanticProperties.Description="Large text preview title" />
                     <Label x:Name="LargeTextPreviewBody"
                            Text="When enabled, this text and the rest of the page become visibly larger."
-                           Style="{StaticResource BodyText}" />
+                           Style="{StaticResource BodyText}"
+                           SemanticProperties.Description="Large text preview body" />
                 </VerticalStackLayout>
             </Border>
 
             <Label x:Name="SettingsStatusLabel"
                    Text="Settings ready."
                    FontAttributes="Bold"
-                   TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentB}}" />
+                   TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentB}}"
+                   SemanticProperties.Description="Settings status" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

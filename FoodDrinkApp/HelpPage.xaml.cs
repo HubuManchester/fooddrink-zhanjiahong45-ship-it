@@ -19,7 +19,7 @@ public partial class HelpPage : ContentPage
     {
         try
         {
-            const string helpText = "Search foods, swipe cards to favorite them, capture a food photo for on-device recognition, use sensors on the hardware tab, and set text size up to two hundred percent in settings.";
+            const string helpText = "Search and filter foods, swipe cards to manage favorites, add or edit records with realistic nutrition values, open details for macro summaries, capture a food photo for on-device recognition, load location, use sensors on the hardware tab, enable shake suggestions, and set theme plus text size up to two hundred percent in settings.";
             await SpeechService.SpeakAsync(helpText);
             SetStatus("Reading help instructions aloud.");
         }

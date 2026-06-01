@@ -65,7 +65,7 @@
     <Style x:Key="GlassCard" TargetType="Border">
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource HairlineL}, Dark={StaticResource Hairline}}" />
         <Setter Property="StrokeThickness" Value="1" />
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Surface1L}, Dark={StaticResource GlassFill}}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Surface1L}, Dark={StaticResource Surface1}}" />
         <Setter Property="Padding" Value="18" />
         <Setter Property="StrokeShape">
             <Setter.Value>

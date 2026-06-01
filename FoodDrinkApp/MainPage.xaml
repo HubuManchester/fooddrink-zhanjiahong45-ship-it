@@ -44,12 +44,14 @@
                                        TextColor="{AppThemeBinding Light={StaticResource TextPrimaryL}, Dark={StaticResource TextPrimary}}"
                                        PlaceholderColor="{AppThemeBinding Light={StaticResource TextMutedL}, Dark={StaticResource TextMuted}}"
                                        BackgroundColor="Transparent"
+                                       SemanticProperties.Description="Food search"
                                        SemanticProperties.Hint="Search the food and drink list" />
                         </Border>
                         <Button Grid.Column="1"
                                 Text="Add"
                                 FontAttributes="Bold"
                                 Clicked="OnAddClicked"
+                                SemanticProperties.Description="Add food or drink"
                                 SemanticProperties.Hint="Add a new food or drink record" />
                     </Grid>
                 </Grid>
@@ -120,12 +122,16 @@
             </Grid>
         </Grid>
 
-        <RefreshView Grid.Row="2" x:Name="FoodRefreshView" Refreshing="OnRefreshing">
+        <RefreshView Grid.Row="2"
+                     x:Name="FoodRefreshView"
+                     Refreshing="OnRefreshing"
+                     SemanticProperties.Description="Refresh food list">
             <CollectionView x:Name="FoodCollection"
                             SelectionMode="None"
                             ItemSizingStrategy="MeasureFirstItem"
                             EmptyView="No matching food or drink records."
-                            Margin="{OnIdiom Phone='16,0,16,18', Tablet='32,0,32,24', Desktop='40,0,40,24'}">
+                            Margin="{OnIdiom Phone='16,0,16,18', Tablet='32,0,32,24', Desktop='40,0,40,24'}"
+                            SemanticProperties.Description="Food and drink results">
                 <CollectionView.ItemsLayout>
                     <GridItemsLayout Orientation="Vertical"
                                      Span="{OnIdiom Phone=1, Tablet=2, Desktop=2}"
@@ -140,11 +146,15 @@
                                      <SwipeItem Text="Favorite"
                                                 BackgroundColor="{StaticResource AccentFreshL}"
                                                 Invoked="OnFavoriteInvoked"
-                                                CommandParameter="{Binding Id}" />
+                                                CommandParameter="{Binding Id}"
+                                                SemanticProperties.Description="Toggle favorite"
+                                                SemanticProperties.Hint="Add or remove this record from favorites" />
                                      <SwipeItem Text="Delete"
                                                 BackgroundColor="{StaticResource WarningTextL}"
                                                 Invoked="OnDeleteInvoked"
-                                                CommandParameter="{Binding Id}" />
+                                                CommandParameter="{Binding Id}"
+                                                SemanticProperties.Description="Delete record"
+                                                SemanticProperties.Hint="Delete this food or drink record" />
                                  </SwipeItems>
                              </SwipeView.RightItems>
                             <Border Style="{StaticResource GlassCard}"
@@ -192,6 +202,7 @@
                                                 Padding="14,8"
                                                 CommandParameter="{Binding Id}"
                                                 Clicked="OnDetailsClicked"
+                                                SemanticProperties.Description="Open details"
                                                 SemanticProperties.Hint="Open nutrition details" />
                                     </Grid>
                                 </Grid>

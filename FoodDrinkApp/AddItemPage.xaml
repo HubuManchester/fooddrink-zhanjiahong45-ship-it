@@ -25,12 +25,15 @@
                 <VerticalStackLayout Spacing="14">
                     <Label Text="Basic Information"
                            Style="{StaticResource TitleText}"
-                           TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentA}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentA}}"
+                           SemanticProperties.HeadingLevel="Level2" />
                     <Entry x:Name="NameEntry"
                            Placeholder="Name"
+                           SemanticProperties.Description="Food or drink name"
                            SemanticProperties.Hint="Required food or drink name" />
                     <Picker x:Name="CategoryPicker"
                             Title="Category"
+                            SemanticProperties.Description="Meal category"
                             SemanticProperties.Hint="Required category">
                         <Picker.Items>
                             <x:String>Breakfast</x:String>
@@ -44,6 +47,7 @@
                             Placeholder="Description, ingredients, flavour, or context"
                             AutoSize="TextChanges"
                             HeightRequest="104"
+                            SemanticProperties.Description="Food or drink description"
                             SemanticProperties.Hint="Describe this food or drink" />
                 </VerticalStackLayout>
             </Border>
@@ -52,32 +56,41 @@
                 <VerticalStackLayout Spacing="14">
                     <Label Text="Nutrition Data"
                            Style="{StaticResource TitleText}"
-                           TextColor="{AppThemeBinding Light={StaticResource AccentFreshL}, Dark={StaticResource AccentFresh}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource AccentFreshL}, Dark={StaticResource AccentFresh}}"
+                           SemanticProperties.HeadingLevel="Level2" />
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                         <Entry x:Name="CaloriesEntry"
                                Placeholder="Calories"
                                FontFamily="Mono"
                                Keyboard="Numeric"
+                               SemanticProperties.Description="Calories"
                                SemanticProperties.Hint="Required calories as a number" />
                         <Entry x:Name="ProteinEntry"
                                Grid.Column="1"
                                Placeholder="Protein g"
                                FontFamily="Mono"
-                               Keyboard="Numeric" />
+                               Keyboard="Numeric"
+                               SemanticProperties.Description="Protein grams"
+                               SemanticProperties.Hint="Enter protein grams as a number" />
                     </Grid>
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                         <Entry x:Name="CarbsEntry"
                                Placeholder="Carbs g"
                                FontFamily="Mono"
-                               Keyboard="Numeric" />
+                               Keyboard="Numeric"
+                               SemanticProperties.Description="Carbohydrate grams"
+                               SemanticProperties.Hint="Enter carbohydrate grams as a number" />
                         <Entry x:Name="FatEntry"
                                Grid.Column="1"
                                Placeholder="Fat g"
                                FontFamily="Mono"
-                               Keyboard="Numeric" />
+                               Keyboard="Numeric"
+                               SemanticProperties.Description="Fat grams"
+                               SemanticProperties.Hint="Enter fat grams as a number" />
                     </Grid>
                     <Entry x:Name="AllergyEntry"
                            Placeholder="Allergy note or dietary restriction"
+                           SemanticProperties.Description="Allergy or dietary note"
                            SemanticProperties.Hint="Enter allergy or dietary information" />
                 </VerticalStackLayout>
             </Border>
@@ -93,13 +106,15 @@
                 </Border.StrokeShape>
                 <Label x:Name="ValidationLabel"
                        TextColor="{AppThemeBinding Light={StaticResource WarningTextL}, Dark={StaticResource WarningText}}"
-                       FontAttributes="Bold" />
+                       FontAttributes="Bold"
+                       SemanticProperties.Description="Validation message" />
             </Border>
 
             <Button x:Name="SaveButton"
                     Text="Save record"
                     FontAttributes="Bold"
                     Clicked="OnSaveClicked"
+                    SemanticProperties.Description="Save record"
                     SemanticProperties.Hint="Validate and save this record" />
         </VerticalStackLayout>
     </ScrollView>

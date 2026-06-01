@@ -33,6 +33,8 @@
                                Style="{StaticResource BodyText}" />
                         <Label Text="Swipe a food card to add or remove it from favorites, then open Details for nutrition summaries."
                                Style="{StaticResource BodyText}" />
+                        <Label Text="Use pull-to-refresh after changing remote data, then add a new record when the meal is missing."
+                               Style="{StaticResource BodyText}" />
                     </VerticalStackLayout>
                 </Border>
 
@@ -46,11 +48,28 @@
                                SemanticProperties.HeadingLevel="Level2" />
                         <Label Text="Capture a food photo to run on-device MobileNet recognition, then read the result aloud."
                                Style="{StaticResource BodyText}" />
+                        <Label Text="Load location to show country, city, region, and coordinates for the meal context."
+                               Style="{StaticResource BodyText}" />
                         <Label Text="Use emulator virtual sensors for accelerometer, compass, and gyroscope. Use a real device for flashlight and haptics."
+                               Style="{StaticResource BodyText}" />
+                        <Label Text="Enable shake-to-suggest, move the device, and listen for a random catalogue meal suggestion."
                                Style="{StaticResource BodyText}" />
                     </VerticalStackLayout>
                 </Border>
             </Grid>
+
+            <Border Style="{StaticResource GlassCard}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Add, edit, and details"
+                           Style="{StaticResource TitleText}"
+                           TextColor="{AppThemeBinding Light={StaticResource AccentFreshL}, Dark={StaticResource AccentFresh}}"
+                           SemanticProperties.HeadingLevel="Level2" />
+                    <Label Text="Complete every required form field with realistic calories and macronutrients before saving."
+                           Style="{StaticResource BodyText}" />
+                    <Label Text="Open Details to review calories, macro ratios, allergy notes, speech playback, edit flow, and vibration reminder."
+                           Style="{StaticResource BodyText}" />
+                </VerticalStackLayout>
+            </Border>
 
             <Border Style="{StaticResource GlassCard}">
                 <VerticalStackLayout Spacing="10">
@@ -58,9 +77,11 @@
                            Style="{StaticResource TitleText}"
                            TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentB}}"
                            SemanticProperties.HeadingLevel="Level2" />
-                    <Label Text="Settings includes light, dark, and system theme modes plus text scaling up to 200% for WCAG 1.4.4."
+                    <Label Text="Settings includes light, dark, and system theme modes plus text scaling up to 200% for WCAG 1.4.4 review."
                            Style="{StaticResource BodyText}" />
-                    <Label Text="Use a screen reader to confirm headings, hints, and status announcements are clear."
+                    <Label Text="Use a screen reader to confirm headings, hints, action descriptions, dynamic status messages, and error recovery are clear."
+                           Style="{StaticResource BodyText}" />
+                    <Label Text="Check phone portrait, phone landscape, tablet, and large-text layouts before recording the final screencast."
                            Style="{StaticResource BodyText}" />
                 </VerticalStackLayout>
             </Border>
