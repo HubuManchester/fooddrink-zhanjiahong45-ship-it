@@ -6,9 +6,10 @@ namespace FoodDrinkApp;
 public partial class HardwarePage : ContentPage
 {
     private int feedbackTestCount;
-    private bool flashlightOn;
+    private readonly CameraVisionService cameraVisionService = new();
+    private readonly FlashlightService flashlightService = new();
+    private readonly LocationLookupService locationLookupService = new();
     private readonly SensorMonitorService sensorMonitor = new();
-    private FoodVisionService? foodVisionService;
     private Prediction? latestPrediction;
     private readonly Random suggestionRandom = new();
 
@@ -35,23 +36,19 @@ public partial class HardwarePage : ContentPage
     {
         try
         {
-            if (!MediaPicker.Default.IsCaptureSupported)
+            if (!cameraVisionService.IsCaptureSupported)
             {
                 SetStatus("This device does not support camera capture.");
                 return;
             }
 
-            var photo = await MediaPicker.Default.CapturePhotoAsync();
-            if (photo is null)
+            var imageBytes = await cameraVisionService.CapturePhotoAsync();
+            if (imageBytes is null)
             {
                 SetStatus("Photo capture cancelled.");
                 return;
             }
 
-            await using var stream = await photo.OpenReadAsync();
-            using var memoryStream = new MemoryStream();
-            await stream.CopyToAsync(memoryStream);
-            var imageBytes = memoryStream.ToArray();
             FoodPhoto.Source = ImageSource.FromStream(() => new MemoryStream(imageBytes));
             HapticFeedback.Default.Perform(HapticFeedbackType.Click);
 
@@ -59,8 +56,7 @@ public partial class HardwarePage : ContentPage
             ReadPredictionButton.IsEnabled = false;
             SetStatus("Food photo captured. Running on-device recognition...");
 
-            var visionService = await LoadFoodVisionServiceAsync();
-            latestPrediction = await Task.Run(() => visionService.Classify(imageBytes));
+            latestPrediction = await cameraVisionService.ClassifyAsync(imageBytes);
             PredictionLabel.Text = $"Food recognition: {latestPrediction.Label} ({latestPrediction.Confidence:P0})";
             ReadPredictionButton.IsEnabled = true;
             SetStatus("Food recognition completed.");
@@ -86,49 +82,21 @@ public partial class HardwarePage : ContentPage
         }
     }
 
-    private async Task<FoodVisionService> LoadFoodVisionServiceAsync()
-    {
-        if (foodVisionService is not null)
-        {
-            return foodVisionService;
-        }
-
-        await using var modelStream = await FileSystem.OpenAppPackageFileAsync("mobilenetv2-7.onnx");
-        using var modelMemory = new MemoryStream();
-        await modelStream.CopyToAsync(modelMemory);
-
-        await using var labelsStream = await FileSystem.OpenAppPackageFileAsync("imagenet-slim-labels.txt");
-        using var reader = new StreamReader(labelsStream);
-        var labels = new List<string>();
-
-        while (await reader.ReadLineAsync() is { } line)
-        {
-            if (!string.IsNullOrWhiteSpace(line))
-            {
-                labels.Add(line);
-            }
-        }
-
-        foodVisionService = new FoodVisionService(modelMemory.ToArray(), labels);
-        return foodVisionService;
-    }
-
     private async void OnGetLocationClicked(object? sender, EventArgs e)
     {
         try
         {
             SetStatus("Getting location...");
-            var request = new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(10));
-            var location = await Geolocation.Default.GetLocationAsync(request);
+            var result = await locationLookupService.GetCurrentMealLocationAsync();
 
-            if (location is null)
+            if (result is null)
             {
                 SetStatus("Current location could not be found.");
                 return;
             }
 
-            CoordinateLabel.Text = $"Latitude {location.Latitude:F5}, longitude {location.Longitude:F5}";
-            LocationLabel.Text = await BuildAddressTextAsync(location);
+            CoordinateLabel.Text = result.CoordinatesText;
+            LocationLabel.Text = result.AddressText;
             SetStatus("Country, city, and coordinates have been loaded.");
         }
         catch (PermissionException)
@@ -140,75 +108,6 @@ public partial class HardwarePage : ContentPage
             AppLog.Error("Load current location", ex);
             SetStatus("Location could not be loaded right now. Try again after checking device location settings.");
         }
-    }
-
-    private static async Task<string> BuildAddressTextAsync(Location location)
-    {
-        try
-        {
-            var placemarks = await Geocoding.Default.GetPlacemarksAsync(location);
-            var placemark = placemarks?.FirstOrDefault();
-            var address = FormatPlacemark(placemark);
-
-            if (!string.IsNullOrWhiteSpace(address))
-            {
-                return address;
-            }
-        }
-        catch (Exception ex)
-        {
-            AppLog.Error("Reverse geocode location", ex);
-        }
-
-        return BuildFallbackAddress(location);
-    }
-
-    private static string FormatPlacemark(Placemark? placemark)
-    {
-        if (placemark is null)
-        {
-            return string.Empty;
-        }
-
-        var parts = new[]
-        {
-            placemark.CountryName,
-            placemark.AdminArea,
-            placemark.Locality,
-            placemark.SubLocality,
-            placemark.Thoroughfare
-        }
-        .Where(part => !string.IsNullOrWhiteSpace(part))
-        .Distinct()
-        .ToArray();
-
-        return parts.Length == 0 ? string.Empty : string.Join(" / ", parts);
-    }
-
-    private static string BuildFallbackAddress(Location location)
-    {
-        if (IsNear(location, 37.422, -122.084, 0.08))
-        {
-            return "United States / California / Mountain View";
-        }
-
-        if (location.Latitude is >= 37.0 and <= 38.2 && location.Longitude is >= -123.2 and <= -121.5)
-        {
-            return "United States / California / San Francisco Bay Area";
-        }
-
-        if (location.Latitude is >= 18 and <= 54 && location.Longitude is >= 73 and <= 135)
-        {
-            return "China / Current city requires a real device or available geocoding service";
-        }
-
-        return "Coordinates were found, but country and city were not returned by this device.";
-    }
-
-    private static bool IsNear(Location location, double latitude, double longitude, double tolerance)
-    {
-        return Math.Abs(location.Latitude - latitude) <= tolerance &&
-               Math.Abs(location.Longitude - longitude) <= tolerance;
     }
 
     private async void OnReadHelpClicked(object? sender, EventArgs e)
@@ -356,18 +255,9 @@ public partial class HardwarePage : ContentPage
     {
         try
         {
-            if (!flashlightOn)
-            {
-                await Flashlight.Default.TurnOnAsync();
-                flashlightOn = true;
-                FlashlightButton.Text = "Off";
-                SetStatus("Flashlight turned on.");
-            }
-            else
-            {
-                await TurnFlashlightOffAsync();
-                SetStatus("Flashlight turned off.");
-            }
+            var isOn = await flashlightService.ToggleAsync();
+            FlashlightButton.Text = FlashlightService.ButtonTextFor(isOn);
+            SetStatus(isOn ? "Flashlight turned on." : "Flashlight turned off.");
         }
         catch (FeatureNotSupportedException)
         {
@@ -439,22 +329,21 @@ public partial class HardwarePage : ContentPage
 
     private async Task TurnFlashlightOffAsync()
     {
-        if (!flashlightOn)
+        if (!flashlightService.IsOn)
         {
             return;
         }
 
         try
         {
-            await Flashlight.Default.TurnOffAsync();
+            await flashlightService.TurnOffAsync();
         }
         catch (Exception ex)
         {
             AppLog.Error("Turn flashlight off", ex);
         }
 
-        flashlightOn = false;
-        FlashlightButton.Text = "Flash";
+        FlashlightButton.Text = FlashlightService.ButtonTextFor(false);
     }
 
     private void StopMotionSensors()

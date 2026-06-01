@@ -2,18 +2,36 @@ using Microsoft.Maui.Graphics;
 
 namespace FoodDrinkApp;
 
+/// <summary>
+/// Draws the protein, carbohydrate, and fat split as an animated circular chart.
+/// </summary>
 public sealed class MacroRingDrawable : IDrawable
 {
     private const float StartAngle = -90f;
 
+    /// <summary>
+    /// Gets the protein grams currently represented by the chart.
+    /// </summary>
     public float Protein { get; private set; }
 
+    /// <summary>
+    /// Gets the carbohydrate grams currently represented by the chart.
+    /// </summary>
     public float Carbs { get; private set; }
 
+    /// <summary>
+    /// Gets the fat grams currently represented by the chart.
+    /// </summary>
     public float Fat { get; private set; }
 
+    /// <summary>
+    /// Gets or sets the animation progress used to reveal chart segments.
+    /// </summary>
     public float Progress { get; set; } = 1f;
 
+    /// <summary>
+    /// Updates the macronutrient values shown by the chart.
+    /// </summary>
     public void SetMacros(float protein, float carbs, float fat)
     {
         Protein = Math.Max(0, protein);
@@ -21,6 +39,9 @@ public sealed class MacroRingDrawable : IDrawable
         Fat = Math.Max(0, fat);
     }
 
+    /// <summary>
+    /// Draws the macro ring into the MAUI graphics canvas.
+    /// </summary>
     public void Draw(ICanvas canvas, RectF dirtyRect)
     {
         var size = Math.Min(dirtyRect.Width, dirtyRect.Height);

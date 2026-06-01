@@ -9,6 +9,8 @@ namespace FoodDrinkApp.Services;
 /// <summary>
 /// Represents the top image-classification label and confidence score.
 /// </summary>
+/// <param name="Label">The display label returned for the top class.</param>
+/// <param name="Confidence">The top class confidence as a value from 0 to 1.</param>
 public sealed record Prediction(string Label, float Confidence);
 
 /// <summary>

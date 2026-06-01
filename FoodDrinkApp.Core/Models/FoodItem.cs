@@ -8,38 +8,71 @@ namespace FoodDrinkApp.Models;
 /// </summary>
 public sealed class FoodItem
 {
+    /// <summary>
+    /// Gets or sets the local SQLite primary key.
+    /// </summary>
     [PrimaryKey, AutoIncrement]
     [JsonIgnore]
     public int LocalId { get; set; }
 
+    /// <summary>
+    /// Gets or sets the stable public id shared with REST-style catalogues.
+    /// </summary>
     [Indexed]
     [JsonPropertyName("id")]
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
 
+    /// <summary>
+    /// Gets or sets the food or drink display name.
+    /// </summary>
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Gets or sets the meal category used by filtering.
+    /// </summary>
     [JsonPropertyName("category")]
     public string Category { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Gets or sets the short description shown on list and detail pages.
+    /// </summary>
     [JsonPropertyName("description")]
     public string Description { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Gets or sets the calorie value in kilocalories.
+    /// </summary>
     [JsonPropertyName("calories")]
     public int Calories { get; set; }
 
+    /// <summary>
+    /// Gets or sets protein grams.
+    /// </summary>
     [JsonPropertyName("protein")]
     public int Protein { get; set; }
 
+    /// <summary>
+    /// Gets or sets carbohydrate grams.
+    /// </summary>
     [JsonPropertyName("carbs")]
     public int Carbs { get; set; }
 
+    /// <summary>
+    /// Gets or sets fat grams.
+    /// </summary>
     [JsonPropertyName("fat")]
     public int Fat { get; set; }
 
+    /// <summary>
+    /// Gets or sets allergy and dietary caution text.
+    /// </summary>
     [JsonPropertyName("allergyNote")]
     public string AllergyNote { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Gets or sets searchable free-text tags.
+    /// </summary>
     [JsonPropertyName("tags")]
     public string Tags { get; set; } = string.Empty;
 

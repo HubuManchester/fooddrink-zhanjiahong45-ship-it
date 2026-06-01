@@ -3,6 +3,8 @@ namespace FoodDrinkApp.Services;
 /// <summary>
 /// Represents the result of validating a food or drink form.
 /// </summary>
+/// <param name="IsValid">Whether validation passed.</param>
+/// <param name="Message">The user-facing validation message when validation failed.</param>
 public sealed record ValidationResult(bool IsValid, string? Message);
 
 /// <summary>
