@@ -10,6 +10,9 @@ public sealed record ValidationResult(bool IsValid, string? Message);
 /// </summary>
 public static class FoodItemValidator
 {
+    private const int MaxCalories = 5000;
+    private const int MaxMacroGrams = 1000;
+
     public static ValidationResult Validate(
         string? name,
         int categoryIndex,
@@ -34,17 +37,22 @@ public static class FoodItemValidator
             return new(false, "Please add a short description.");
         }
 
-        foreach (var (value, field) in new[]
+        foreach (var (value, field, max, unit) in new[]
                  {
-                     (calories, "calories"),
-                     (protein, "protein"),
-                     (carbs, "carbs"),
-                     (fat, "fat")
+                     (calories, "calories", MaxCalories, "kcal"),
+                     (protein, "protein", MaxMacroGrams, "g"),
+                     (carbs, "carbs", MaxMacroGrams, "g"),
+                     (fat, "fat", MaxMacroGrams, "g")
                  })
         {
             if (!int.TryParse(value, out var number) || number < 0)
             {
                 return new(false, $"Please enter a valid non-negative number for {field}.");
+            }
+
+            if (number > max)
+            {
+                return new(false, $"Please enter a realistic value for {field} ({max} {unit} or less).");
             }
         }
 

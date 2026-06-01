@@ -56,8 +56,9 @@ public partial class AddItemPage : ContentPage
 
             await Shell.Current.GoToAsync("..");
         }
-        catch
+        catch (Exception ex)
         {
+            AppLog.Error("Save food record", ex);
             ShowValidation("The record could not be saved right now. Please check your connection and try again.");
         }
     }

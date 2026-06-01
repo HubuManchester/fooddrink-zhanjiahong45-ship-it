@@ -34,8 +34,9 @@ public partial class MainPage : ContentPage
             UpdateCategoryOptions(loadedItems);
             ApplyFilters();
         }
-        catch
+        catch (Exception ex)
         {
+            AppLog.Error("Load food list", ex);
             loadedItems = [];
             FoodCollection.ItemsSource = Array.Empty<FoodItem>();
             UpdateStatus("Food list could not be loaded. Local fallback data will be used on refresh.", announce: true);

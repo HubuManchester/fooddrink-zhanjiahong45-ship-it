@@ -23,8 +23,9 @@ public partial class HelpPage : ContentPage
             await SpeechService.SpeakAsync(helpText);
             SetStatus("Reading help instructions aloud.");
         }
-        catch
+        catch (Exception ex)
         {
+            AppLog.Error("Read help page aloud", ex);
             SetStatus("Help instructions could not be read aloud right now.");
         }
     }
@@ -35,8 +36,9 @@ public partial class HelpPage : ContentPage
         {
             throw new FileNotFoundException("Demo file missing for internal error handling.");
         }
-        catch
+        catch (Exception ex)
         {
+            AppLog.Error("Run handled error demo", ex);
             SetStatus("Demo error handled gracefully. The app keeps running.");
         }
     }

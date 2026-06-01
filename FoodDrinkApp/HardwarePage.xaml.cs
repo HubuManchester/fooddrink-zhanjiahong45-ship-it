@@ -70,16 +70,19 @@ public partial class HardwarePage : ContentPage
         {
             SetStatus("Camera permission was denied. Enable camera access in device settings.");
         }
-        catch (FileNotFoundException)
+        catch (FileNotFoundException ex)
         {
+            AppLog.Error("Load food recognition assets", ex);
             SetStatus("Food recognition assets are missing from this app build.");
         }
-        catch (InvalidOperationException)
+        catch (InvalidOperationException ex)
         {
+            AppLog.Error("Run food recognition", ex);
             SetStatus("Food recognition could not start on this device right now.");
         }
-        catch
+        catch (Exception ex)
         {
+            AppLog.Error("Capture or classify food photo", ex);
             SetStatus("Camera capture or food recognition could not be completed right now.");
         }
     }
@@ -133,8 +136,9 @@ public partial class HardwarePage : ContentPage
         {
             SetStatus("Location permission was denied. Enable location access in device settings.");
         }
-        catch
+        catch (Exception ex)
         {
+            AppLog.Error("Load current location", ex);
             SetStatus("Location could not be loaded right now. Try again after checking device location settings.");
         }
     }
@@ -152,8 +156,9 @@ public partial class HardwarePage : ContentPage
                 return address;
             }
         }
-        catch
+        catch (Exception ex)
         {
+            AppLog.Error("Reverse geocode location", ex);
         }
 
         return BuildFallbackAddress(location);
@@ -215,8 +220,9 @@ public partial class HardwarePage : ContentPage
             await SpeechService.SpeakAsync(helpText);
             SetStatus("Reading help content aloud.");
         }
-        catch
+        catch (Exception ex)
         {
+            AppLog.Error("Read hardware help aloud", ex);
             SetStatus("Text to speech could not start on this device right now.");
         }
     }
@@ -252,8 +258,9 @@ public partial class HardwarePage : ContentPage
         {
             SetStatus("Accelerometer is not supported on this device.");
         }
-        catch
+        catch (Exception ex)
         {
+            AppLog.Error("Toggle accelerometer", ex);
             SetStatus("Accelerometer could not be started on this device.");
         }
     }
@@ -295,8 +302,9 @@ public partial class HardwarePage : ContentPage
         {
             SetStatus("Compass is not supported on this device.");
         }
-        catch
+        catch (Exception ex)
         {
+            AppLog.Error("Toggle compass", ex);
             SetStatus("Compass could not be started on this device.");
         }
     }
@@ -338,8 +346,9 @@ public partial class HardwarePage : ContentPage
         {
             SetStatus("Gyroscope is not supported on this device.");
         }
-        catch
+        catch (Exception ex)
         {
+            AppLog.Error("Toggle gyroscope", ex);
             SetStatus("Gyroscope could not be started on this device.");
         }
     }
@@ -377,8 +386,9 @@ public partial class HardwarePage : ContentPage
         {
             SetStatus("Camera permission is required to use the flashlight.");
         }
-        catch
+        catch (Exception ex)
         {
+            AppLog.Error("Toggle flashlight", ex);
             SetStatus("Flashlight could not be changed on this device.");
         }
     }
@@ -414,8 +424,9 @@ public partial class HardwarePage : ContentPage
         {
             SetStatus("Shake suggestions are not supported on this device.");
         }
-        catch
+        catch (Exception ex)
         {
+            AppLog.Error("Toggle shake suggestions", ex);
             SetStatus("Shake suggestions could not be enabled on this device.");
         }
     }
@@ -432,8 +443,9 @@ public partial class HardwarePage : ContentPage
             SetStatus(text);
             await SpeechService.SpeakAsync($"Try {suggestion.Name}.");
         }
-        catch
+        catch (Exception ex)
         {
+            AppLog.Error("Select shake meal suggestion", ex);
             SetStatus("A meal suggestion could not be selected right now.");
         }
     }
@@ -465,8 +477,9 @@ public partial class HardwarePage : ContentPage
         {
             await Flashlight.Default.TurnOffAsync();
         }
-        catch
+        catch (Exception ex)
         {
+            AppLog.Error("Turn flashlight off", ex);
         }
 
         flashlightOn = false;
@@ -506,8 +519,9 @@ public partial class HardwarePage : ContentPage
                 Gyroscope.Default.Stop();
             }
         }
-        catch
+        catch (Exception ex)
         {
+            AppLog.Error("Stop motion sensors", ex);
         }
 
         AccelerometerButton.Text = "Start";
@@ -535,8 +549,9 @@ public partial class HardwarePage : ContentPage
             await SpeechService.SpeakAsync($"Food recognition result: {latestPrediction.Label}, confidence {latestPrediction.Confidence:P0}.");
             SetStatus("Reading food recognition result aloud.");
         }
-        catch
+        catch (Exception ex)
         {
+            AppLog.Error("Read food recognition result aloud", ex);
             SetStatus("Food recognition result could not be read aloud right now.");
         }
     }
@@ -551,8 +566,9 @@ public partial class HardwarePage : ContentPage
             FeedbackCountLabel.Text = $"Haptic feedback tests: {feedbackTestCount}";
             SetStatus("Vibration and haptic feedback triggered. The changing counter can be used for screen-recorded verification.");
         }
-        catch
+        catch (Exception ex)
         {
+            AppLog.Error("Trigger vibration and haptic feedback", ex);
             SetStatus("Vibration or haptic feedback could not run on this device.");
         }
     }

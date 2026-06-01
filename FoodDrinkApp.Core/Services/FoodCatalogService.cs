@@ -107,9 +107,21 @@ public static class FoodCatalogService
                     return item;
                 }
             }
-            catch
+            catch (HttpRequestException ex)
             {
-                // Fall back to the last loaded cache below.
+                AppLog.Error("Load food item from MockAPI", ex);
+            }
+            catch (TaskCanceledException ex)
+            {
+                AppLog.Error("Load food item from MockAPI timed out", ex);
+            }
+            catch (JsonException ex)
+            {
+                AppLog.Error("Parse food item from MockAPI", ex);
+            }
+            catch (Exception ex)
+            {
+                AppLog.Error("Load food item from MockAPI", ex);
             }
         }
 
@@ -153,8 +165,21 @@ public static class FoodCatalogService
                 return cachedItems;
             }
         }
-        catch
+        catch (HttpRequestException ex)
         {
+            AppLog.Error("Load food catalog from MockAPI", ex);
+        }
+        catch (TaskCanceledException ex)
+        {
+            AppLog.Error("Load food catalog from MockAPI timed out", ex);
+        }
+        catch (JsonException ex)
+        {
+            AppLog.Error("Parse food catalog from MockAPI", ex);
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("Load food catalog from MockAPI", ex);
             // Keep the app usable during demos even if the network is unavailable.
         }
 
