@@ -4,7 +4,7 @@
              xmlns:models="clr-namespace:FoodDrinkApp.Models;assembly=FoodDrinkApp.Core"
              x:Class="FoodDrinkApp.MainPage"
              Title="NutriBite">
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,Auto,*">
         <Grid.Background>
             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Color="{AppThemeBinding Light=#FFF1DA, Dark=#130F0C}" Offset="0.0" />
@@ -13,7 +13,7 @@
             </LinearGradientBrush>
         </Grid.Background>
 
-        <Grid Padding="20,18,20,18">
+        <Grid Padding="{OnIdiom Phone='20,18,20,18', Tablet='32,24,32,18', Desktop='40,24,40,18'}">
             <Border StrokeThickness="0" Padding="18">
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="8" />
@@ -87,18 +87,97 @@
             </Border>
         </Grid>
 
-        <RefreshView Grid.Row="1" x:Name="FoodRefreshView" Refreshing="OnRefreshing">
+        <Grid Grid.Row="1"
+              Padding="{OnIdiom Phone='16,0,16,12', Tablet='32,0,32,14', Desktop='40,0,40,14'}"
+              ColumnDefinitions="{OnIdiom Phone='*', Tablet='*,Auto,Auto', Desktop='*,Auto,Auto'}"
+              RowDefinitions="{OnIdiom Phone='Auto,Auto,Auto', Tablet='Auto', Desktop='Auto'}"
+              ColumnSpacing="12"
+              RowSpacing="10">
+            <Border StrokeThickness="1"
+                    Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
+                    BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
+                    Padding="0">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8" />
+                </Border.StrokeShape>
+                <Picker x:Name="CategoryPicker"
+                        Title="All categories"
+                        SelectedIndexChanged="OnCategoryChanged"
+                        SemanticProperties.Description="Category filter"
+                        SemanticProperties.Hint="Filter foods and drinks by category" />
+            </Border>
+
+            <Border Grid.Column="{OnIdiom Phone=0, Tablet=1, Desktop=1}"
+                    Grid.Row="{OnIdiom Phone=1, Tablet=0, Desktop=0}"
+                    StrokeThickness="1"
+                    Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
+                    BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
+                    Padding="12,2">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8" />
+                </Border.StrokeShape>
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" VerticalOptions="Center">
+                    <Label Text="Favorites"
+                           VerticalOptions="Center"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light=#3A2518, Dark=#FFF2DF}" />
+                    <Switch x:Name="FavoritesOnlySwitch"
+                            Grid.Column="1"
+                            Toggled="OnFavoritesOnlyToggled"
+                            SemanticProperties.Description="Favorites filter"
+                            SemanticProperties.Hint="Show only favorite foods and drinks" />
+                </Grid>
+            </Border>
+
+            <Grid Grid.Column="{OnIdiom Phone=0, Tablet=2, Desktop=2}"
+                  Grid.Row="{OnIdiom Phone=2, Tablet=0, Desktop=0}"
+                  ColumnDefinitions="Auto,*"
+                  ColumnSpacing="8"
+                  VerticalOptions="Center">
+                <ActivityIndicator x:Name="LoadingIndicator"
+                                   IsRunning="False"
+                                   IsVisible="False"
+                                   WidthRequest="28"
+                                   HeightRequest="28"
+                                   SemanticProperties.Description="Loading indicator" />
+                <Label x:Name="ResultsStatusLabel"
+                       Grid.Column="1"
+                       Text="Loading foods..."
+                       FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}"
+                       VerticalOptions="Center"
+                       SemanticProperties.Description="Food list status" />
+            </Grid>
+        </Grid>
+
+        <RefreshView Grid.Row="2" x:Name="FoodRefreshView" Refreshing="OnRefreshing">
             <CollectionView x:Name="FoodCollection"
                             SelectionMode="None"
+                            ItemSizingStrategy="MeasureFirstItem"
                             EmptyView="No matching food or drink records."
-                            Margin="16,0,16,18">
+                            Margin="{OnIdiom Phone='16,0,16,18', Tablet='32,0,32,24', Desktop='40,0,40,24'}">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical"
+                                     Span="{OnIdiom Phone=1, Tablet=2, Desktop=2}"
+                                     VerticalItemSpacing="12"
+                                     HorizontalItemSpacing="12" />
+                </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:FoodItem">
-                        <Border StrokeThickness="1"
-                                Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
-                                BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
-                                Padding="0"
-                                Margin="0,0,0,12">
+                        <SwipeView>
+                            <SwipeView.RightItems>
+                                <SwipeItems Mode="Execute">
+                                    <SwipeItem Text="Favorite"
+                                               BackgroundColor="#2F7A4F"
+                                               Invoked="OnFavoriteInvoked"
+                                               CommandParameter="{Binding Id}" />
+                                </SwipeItems>
+                            </SwipeView.RightItems>
+                            <Border StrokeThickness="1"
+                                    Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
+                                    BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
+                                    Padding="0"
+                                    Margin="0,0,0,12">
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="8" />
                             </Border.StrokeShape>
@@ -152,7 +231,8 @@
                                     </Grid>
                                 </Grid>
                             </Grid>
-                        </Border>
+                            </Border>
+                        </SwipeView>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>

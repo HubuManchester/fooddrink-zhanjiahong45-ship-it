@@ -2,6 +2,9 @@ using System.Numerics;
 
 namespace FoodDrinkApp.Services;
 
+/// <summary>
+/// Formats sensor readings into stable, screen-reader-friendly text.
+/// </summary>
 public static class SensorFormatter
 {
     public static string Vector3(string label, Vector3 value) =>

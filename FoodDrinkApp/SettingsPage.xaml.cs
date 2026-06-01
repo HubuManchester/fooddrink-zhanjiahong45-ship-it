@@ -8,13 +8,13 @@ public partial class SettingsPage : ContentPage
     {
         InitializeComponent();
         ThemePicker.SelectedIndex = 0;
-        LargeTextSwitch.IsToggled = AccessibilityService.LargeTextEnabled;
+        TextScalePicker.SelectedIndex = AccessibilityService.TextScaleLevel;
     }
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        LargeTextSwitch.IsToggled = AccessibilityService.LargeTextEnabled;
+        TextScalePicker.SelectedIndex = AccessibilityService.TextScaleLevel;
         ApplyLargeTextState();
     }
 
@@ -30,25 +30,30 @@ public partial class SettingsPage : ContentPage
         Announce("Theme preference updated.");
     }
 
-    private void OnLargeTextToggled(object? sender, ToggledEventArgs e)
+    private void OnTextScaleChanged(object? sender, EventArgs e)
     {
-        AccessibilityService.LargeTextEnabled = e.Value;
+        if (TextScalePicker.SelectedIndex < 0)
+        {
+            return;
+        }
+
+        AccessibilityService.TextScaleLevel = TextScalePicker.SelectedIndex;
         ApplyLargeTextState();
-        Announce(e.Value
-            ? "Large text mode is on. Page text is now larger."
-            : "Large text mode is off. Page text has returned to normal.");
+        Announce(AccessibilityService.TextScaleLevel == 0
+            ? "Standard text size selected."
+            : $"Text size set to {AccessibilityService.CurrentTextScale:P0}.");
     }
 
     private void ApplyLargeTextState()
     {
         AccessibilityService.ApplyFontScale(this);
 
-        LargeTextPreviewTitle.Text = AccessibilityService.LargeTextEnabled
-            ? "Large text preview: enlarged"
-            : "Large text preview";
-        LargeTextPreviewBody.Text = AccessibilityService.LargeTextEnabled
-            ? "Text is now noticeably larger. The food and hardware pages will use the same setting."
-            : "Turn on the switch to enlarge this preview and other page text.";
+        LargeTextPreviewTitle.Text = AccessibilityService.TextScaleLevel == 0
+            ? "Text size preview"
+            : $"Text size preview: {AccessibilityService.CurrentTextScale:P0}";
+        LargeTextPreviewBody.Text = AccessibilityService.TextScaleLevel == 0
+            ? "Choose a larger text size to enlarge this preview and other page text."
+            : "The food, hardware, help, and settings pages will use the same text scale.";
     }
 
     private void Announce(string message)

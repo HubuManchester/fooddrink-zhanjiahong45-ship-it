@@ -25,6 +25,10 @@
             ContentTemplate="{DataTemplate local:HardwarePage}"
             Route="HardwarePage" />
         <ShellContent
+            Title="Help"
+            ContentTemplate="{DataTemplate local:HelpPage}"
+            Route="HelpPage" />
+        <ShellContent
             Title="Settings"
             ContentTemplate="{DataTemplate local:SettingsPage}"
             Route="SettingsPage" />

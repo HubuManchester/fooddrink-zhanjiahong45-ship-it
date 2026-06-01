@@ -4,10 +4,23 @@ namespace FoodDrinkApp.Services;
 
 public static class AccessibilityService
 {
-    private const double LargeTextScale = 1.22;
     private static readonly ConditionalWeakTable<BindableObject, FontSizeStore> OriginalFontSizes = new();
 
-    public static bool LargeTextEnabled { get; set; }
+    public static int TextScaleLevel { get; set; }
+
+    public static bool LargeTextEnabled
+    {
+        get => TextScaleLevel > 0;
+        set => TextScaleLevel = value ? Math.Max(TextScaleLevel, 1) : 0;
+    }
+
+    public static double CurrentTextScale => TextScaleLevel switch
+    {
+        1 => 1.35,
+        2 => 1.75,
+        3 => 2.0,
+        _ => 1.0
+    };
 
     public static void ApplyFontScale(Element root)
     {
@@ -26,7 +39,7 @@ public static class AccessibilityService
 
     private static void ApplyToElement(Element element)
     {
-        var scale = LargeTextEnabled ? LargeTextScale : 1.0;
+        var scale = CurrentTextScale;
 
         switch (element)
         {

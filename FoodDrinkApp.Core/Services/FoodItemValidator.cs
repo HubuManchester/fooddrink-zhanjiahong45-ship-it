@@ -1,7 +1,13 @@
 namespace FoodDrinkApp.Services;
 
+/// <summary>
+/// Represents the result of validating a food or drink form.
+/// </summary>
 public sealed record ValidationResult(bool IsValid, string? Message);
 
+/// <summary>
+/// Validates food and drink input without depending on MAUI controls.
+/// </summary>
 public static class FoodItemValidator
 {
     public static ValidationResult Validate(

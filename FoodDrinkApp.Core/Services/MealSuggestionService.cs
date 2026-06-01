@@ -2,6 +2,9 @@ using FoodDrinkApp.Models;
 
 namespace FoodDrinkApp.Services;
 
+/// <summary>
+/// Chooses a meal suggestion from the available food catalogue.
+/// </summary>
 public static class MealSuggestionService
 {
     public static FoodItem PickRandom(IReadOnlyList<FoodItem> items, Random rng)

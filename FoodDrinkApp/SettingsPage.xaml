@@ -56,20 +56,29 @@
 
                     <BoxView HeightRequest="1" Color="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}" />
 
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="14">
+                    <Grid RowDefinitions="Auto,Auto" RowSpacing="8">
                         <VerticalStackLayout Spacing="4">
-                            <Label Text="Large text mode"
+                            <Label Text="Text size"
                                    FontSize="17"
                                    FontAttributes="Bold"
                                    TextColor="{AppThemeBinding Light=#2F7A4F, Dark=#8CE6A1}" />
-                            <Label Text="Increase text size for accessibility demonstration."
+                            <Label Text="Scale text up to 200% for WCAG 1.4.4 verification."
                                    FontSize="13"
                                    TextColor="{AppThemeBinding Light=#8B6D55, Dark=#D8C4AC}" />
                         </VerticalStackLayout>
-                        <Switch x:Name="LargeTextSwitch"
-                                Grid.Column="1"
-                                Toggled="OnLargeTextToggled"
-                                SemanticProperties.Hint="Increase text size across the current session" />
+                        <Picker x:Name="TextScalePicker"
+                                Grid.Row="1"
+                                Title="Choose text size"
+                                SelectedIndexChanged="OnTextScaleChanged"
+                                SemanticProperties.Description="Text size"
+                                SemanticProperties.Hint="Choose standard, large, extra large, or maximum text size">
+                            <Picker.Items>
+                                <x:String>Standard text</x:String>
+                                <x:String>Large text 135%</x:String>
+                                <x:String>Extra large text 175%</x:String>
+                                <x:String>Maximum text 200%</x:String>
+                            </Picker.Items>
+                        </Picker>
                     </Grid>
                 </VerticalStackLayout>
             </Border>

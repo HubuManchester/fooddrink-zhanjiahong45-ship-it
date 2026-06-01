@@ -1,21 +1,53 @@
 # NutriBite
 
-NutriBite is a .NET MAUI Food and Drink app for tracking nutrition, meal context, and device-supported interactions.
+Author: TODO student name
 
-## Features
+NutriBite is a .NET MAUI 9 Food and Drink app for tracking nutrition, meal context, and device-supported interactions.
 
-- Food and drink list with search, details, and refresh.
-- Add-record form with friendly validation.
-- Camera, location, text-to-speech, vibration, and haptic demonstrations.
-- Theme switching, large text, semantic descriptions, and screen reader announcements.
-- Local fallback data when mockapi.io is not configured.
+## Feature List
 
-## Build
+- Foods tab: searchable food and drink list, category filter, favorites-only filter, swipe-to-favorite action, pull-to-refresh, details page, and add-record form.
+- Hardware tab: camera capture, on-device MobileNetV2 ONNX recognition, location/geocoding, text-to-speech, vibration/haptic feedback, accelerometer, compass, gyroscope, flashlight, and shake-to-suggest.
+- Help tab: clear feature instructions, read-aloud help, and a friendly handled-error demo.
+- Settings tab: system/light/dark themes and text scaling up to 200%.
 
-Use Visual Studio 2022 with the .NET MAUI workload, or run:
+## Build And Run
+
+Use Visual Studio 2022 with the .NET MAUI workload and Android SDK installed. Select an Android emulator or device and run `FoodDrinkApp`.
+
+Command-line checks:
 
 ```powershell
 dotnet build .\FoodDrinkApp.csproj -f net9.0-android
+dotnet test ..\FoodDrinkApp.sln
 ```
 
-The repository keeps Windows build outputs under `C:\MauiBuild\...` to avoid path issues during Android packaging on Windows.
+The repository uses `Directory.Build.props` to redirect Windows build output to `C:\MauiBuild\...`, reducing long-path and Android packaging issues.
+
+## Hardware Verification
+
+- Camera: capture a food photo and confirm a label plus confidence appears.
+- ML/CV: bundled `mobilenetv2-7.onnx` and `imagenet-slim-labels.txt` are MAUI raw assets, so recognition runs without network access.
+- Location: use emulator location controls or a real device and confirm address plus coordinates.
+- Sensors: use Android Emulator Extended Controls, Virtual sensors for accelerometer, compass, and gyroscope.
+- Flashlight and haptics: verify on a real device where emulator hardware is unavailable.
+- Shake: shake the emulator/device and confirm a meal suggestion appears and can be spoken.
+
+## Accessibility And WCAG
+
+- Semantic descriptions, hints, headings, and screen reader announcements are included on the main controls.
+- Text scaling supports standard, 135%, 175%, and 200% sizes for WCAG 1.4.4 review.
+- Core tests verify representative palette pairs meet WCAG AA contrast thresholds.
+- Tablet and desktop layouts use adaptive spacing and two-column food cards via `OnIdiom`.
+
+## Manual Checklist
+
+- Run light mode, dark mode, and system theme.
+- Run screen reader read-through of Foods, Hardware, Help, and Settings.
+- Test large text at 200% and confirm labels/buttons remain usable.
+- Test swipe-to-favorite, category filter, favorites-only filter, and refresh.
+- Test Android phone emulator, Android tablet emulator, and Windows if available.
+
+## TODO Before Submission (Human)
+
+Screencast, final manual review, push if needed, and university submission upload.

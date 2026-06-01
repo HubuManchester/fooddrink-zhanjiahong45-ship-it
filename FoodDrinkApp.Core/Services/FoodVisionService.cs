@@ -6,8 +6,14 @@ using SixLabors.ImageSharp.Processing;
 
 namespace FoodDrinkApp.Services;
 
+/// <summary>
+/// Represents the top image-classification label and confidence score.
+/// </summary>
 public sealed record Prediction(string Label, float Confidence);
 
+/// <summary>
+/// Runs bundled ONNX image classification over camera photos.
+/// </summary>
 public sealed class FoodVisionService : IDisposable
 {
     private static readonly float[] ImageNetMean = [0.485f, 0.456f, 0.406f];
