@@ -58,7 +58,10 @@
                            Style="{StaticResource TitleText}"
                            TextColor="{AppThemeBinding Light={StaticResource AccentFreshL}, Dark={StaticResource AccentFresh}}"
                            SemanticProperties.HeadingLevel="Level2" />
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <Grid ColumnDefinitions="{OnIdiom Phone='*,*', Tablet='*,*,*,*', Desktop='*,*,*,*'}"
+                          RowDefinitions="{OnIdiom Phone='Auto,Auto', Tablet='Auto', Desktop='Auto'}"
+                          ColumnSpacing="12"
+                          RowSpacing="12">
                         <Entry x:Name="CaloriesEntry"
                                Placeholder="Calories"
                                FontFamily="Mono"
@@ -72,16 +75,17 @@
                                Keyboard="Numeric"
                                SemanticProperties.Description="Protein grams"
                                SemanticProperties.Hint="Enter protein grams as a number" />
-                    </Grid>
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                         <Entry x:Name="CarbsEntry"
+                               Grid.Row="{OnIdiom Phone=1, Tablet=0, Desktop=0}"
+                               Grid.Column="{OnIdiom Phone=0, Tablet=2, Desktop=2}"
                                Placeholder="Carbs g"
                                FontFamily="Mono"
                                Keyboard="Numeric"
                                SemanticProperties.Description="Carbohydrate grams"
                                SemanticProperties.Hint="Enter carbohydrate grams as a number" />
                         <Entry x:Name="FatEntry"
-                               Grid.Column="1"
+                               Grid.Row="{OnIdiom Phone=1, Tablet=0, Desktop=0}"
+                               Grid.Column="{OnIdiom Phone=1, Tablet=3, Desktop=3}"
                                Placeholder="Fat g"
                                FontFamily="Mono"
                                Keyboard="Numeric"

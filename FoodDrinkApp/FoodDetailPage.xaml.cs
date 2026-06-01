@@ -69,6 +69,7 @@ public partial class FoodDetailPage : ContentPage
         macroRingDrawable.SetMacros(currentItem.Protein, currentItem.Carbs, currentItem.Fat);
         AnimateMacroRing();
         SemanticProperties.SetDescription(NameLabel, currentItem.AccessibleSummary);
+        SemanticProperties.SetDescription(MacroRingView, $"Macro ratio ring for {currentItem.MacroSummary}.");
     }
 
     private async Task AnimateEntranceAsync()

@@ -134,7 +134,7 @@
                             SemanticProperties.Description="Food and drink results">
                 <CollectionView.ItemsLayout>
                     <GridItemsLayout Orientation="Vertical"
-                                     Span="{OnIdiom Phone=1, Tablet=2, Desktop=2}"
+                                     Span="{OnIdiom Phone=1, Tablet=2, Desktop=3}"
                                      VerticalItemSpacing="12"
                                      HorizontalItemSpacing="12" />
                 </CollectionView.ItemsLayout>

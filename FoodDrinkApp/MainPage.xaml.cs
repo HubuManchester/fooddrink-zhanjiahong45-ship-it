@@ -8,6 +8,8 @@ public partial class MainPage : ContentPage
     private const string AllCategories = "All categories";
     private readonly HashSet<string> favoriteItemIds = new(StringComparer.Ordinal);
     private IReadOnlyList<FoodItem> loadedItems = [];
+    private CancellationTokenSource? searchDebounce;
+    private int loadRequestVersion;
     private bool updatingCategoryPicker;
 
     public MainPage()
@@ -22,8 +24,15 @@ public partial class MainPage : ContentPage
         await LoadFoodItemsAsync(SearchFoodBar.Text);
     }
 
-    private async Task LoadFoodItemsAsync(string? query = null)
+    protected override void OnDisappearing()
     {
+        searchDebounce?.Cancel();
+        base.OnDisappearing();
+    }
+
+    private async Task LoadFoodItemsAsync(string? query = null, CancellationToken cancellationToken = default)
+    {
+        var requestVersion = Interlocked.Increment(ref loadRequestVersion);
         try
         {
             LoadingIndicator.IsVisible = true;
@@ -31,9 +40,20 @@ public partial class MainPage : ContentPage
             UpdateStatus("Loading foods...");
 
             var repository = await AppDataService.GetRepositoryAsync();
-            loadedItems = await repository.SearchAsync(query);
+            var items = await repository.SearchAsync(query);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (requestVersion != loadRequestVersion)
+            {
+                return;
+            }
+
+            loadedItems = items;
             UpdateCategoryOptions(loadedItems);
             ApplyFilters();
+        }
+        catch (OperationCanceledException)
+        {
         }
         catch (Exception ex)
         {
@@ -44,8 +64,11 @@ public partial class MainPage : ContentPage
         }
         finally
         {
-            LoadingIndicator.IsRunning = false;
-            LoadingIndicator.IsVisible = false;
+            if (requestVersion == loadRequestVersion)
+            {
+                LoadingIndicator.IsRunning = false;
+                LoadingIndicator.IsVisible = false;
+            }
         }
     }
 
@@ -64,11 +87,24 @@ public partial class MainPage : ContentPage
 
     private async void OnSearchTextChanged(object? sender, TextChangedEventArgs e)
     {
-        await LoadFoodItemsAsync(e.NewTextValue);
+        searchDebounce?.Cancel();
+        searchDebounce?.Dispose();
+        searchDebounce = new CancellationTokenSource();
+        var token = searchDebounce.Token;
+
+        try
+        {
+            await Task.Delay(250, token);
+            await LoadFoodItemsAsync(e.NewTextValue, token);
+        }
+        catch (OperationCanceledException)
+        {
+        }
     }
 
     private async void OnSearchButtonPressed(object? sender, EventArgs e)
     {
+        searchDebounce?.Cancel();
         await LoadFoodItemsAsync(SearchFoodBar.Text);
     }
 
