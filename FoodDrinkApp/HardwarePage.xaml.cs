@@ -9,6 +9,8 @@ public partial class HardwarePage : ContentPage
     private bool accelerometerReadoutEnabled;
     private bool shakeSuggestionEnabled;
     private bool flashlightOn;
+    private FoodVisionService? foodVisionService;
+    private Prediction? latestPrediction;
     private readonly Random suggestionRandom = new();
 
     public HardwarePage()
@@ -52,17 +54,61 @@ public partial class HardwarePage : ContentPage
             await stream.CopyToAsync(memoryStream);
             var imageBytes = memoryStream.ToArray();
             FoodPhoto.Source = ImageSource.FromStream(() => new MemoryStream(imageBytes));
-            SetStatus("Food photo captured successfully.");
             HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+
+            PredictionLabel.Text = "Classifying food photo...";
+            ReadPredictionButton.IsEnabled = false;
+            SetStatus("Food photo captured. Running on-device recognition...");
+
+            var visionService = await LoadFoodVisionServiceAsync();
+            latestPrediction = await Task.Run(() => visionService.Classify(imageBytes));
+            PredictionLabel.Text = $"Food recognition: {latestPrediction.Label} ({latestPrediction.Confidence:P0})";
+            ReadPredictionButton.IsEnabled = true;
+            SetStatus("Food recognition completed.");
         }
         catch (PermissionException)
         {
             SetStatus("Camera permission was denied. Enable camera access in device settings.");
         }
+        catch (FileNotFoundException)
+        {
+            SetStatus("Food recognition assets are missing from this app build.");
+        }
+        catch (InvalidOperationException)
+        {
+            SetStatus("Food recognition could not start on this device right now.");
+        }
         catch
         {
-            SetStatus("Camera capture could not be completed right now.");
+            SetStatus("Camera capture or food recognition could not be completed right now.");
         }
+    }
+
+    private async Task<FoodVisionService> LoadFoodVisionServiceAsync()
+    {
+        if (foodVisionService is not null)
+        {
+            return foodVisionService;
+        }
+
+        await using var modelStream = await FileSystem.OpenAppPackageFileAsync("mobilenetv2-7.onnx");
+        using var modelMemory = new MemoryStream();
+        await modelStream.CopyToAsync(modelMemory);
+
+        await using var labelsStream = await FileSystem.OpenAppPackageFileAsync("imagenet-slim-labels.txt");
+        using var reader = new StreamReader(labelsStream);
+        var labels = new List<string>();
+
+        while (await reader.ReadLineAsync() is { } line)
+        {
+            if (!string.IsNullOrWhiteSpace(line))
+            {
+                labels.Add(line);
+            }
+        }
+
+        foodVisionService = new FoodVisionService(modelMemory.ToArray(), labels);
+        return foodVisionService;
     }
 
     private async void OnGetLocationClicked(object? sender, EventArgs e)
@@ -165,7 +211,7 @@ public partial class HardwarePage : ContentPage
     {
         try
         {
-            const string helpText = "NutriBite records foods and drinks, shows nutrition details, and uses camera, location, speech, haptic feedback, accelerometer, compass, gyroscope, flashlight, and shake suggestions to make meal tracking more practical.";
+            const string helpText = "NutriBite records foods and drinks, shows nutrition details, and uses camera, on-device food recognition, location, speech, haptic feedback, accelerometer, compass, gyroscope, flashlight, and shake suggestions to make meal tracking more practical.";
             await SpeechService.SpeakAsync(helpText);
             SetStatus("Reading help content aloud.");
         }
@@ -474,6 +520,25 @@ public partial class HardwarePage : ContentPage
     {
         SpeechService.Stop();
         SetStatus("Reading stopped.");
+    }
+
+    private async void OnReadPredictionClicked(object? sender, EventArgs e)
+    {
+        try
+        {
+            if (latestPrediction is null)
+            {
+                SetStatus("There is no food recognition result to read yet.");
+                return;
+            }
+
+            await SpeechService.SpeakAsync($"Food recognition result: {latestPrediction.Label}, confidence {latestPrediction.Confidence:P0}.");
+            SetStatus("Reading food recognition result aloud.");
+        }
+        catch
+        {
+            SetStatus("Food recognition result could not be read aloud right now.");
+        }
     }
 
     private void OnFeedbackClicked(object? sender, EventArgs e)

@@ -58,6 +58,20 @@
                                Aspect="AspectFill"
                                SemanticProperties.Description="Captured food photo preview" />
                     </Border>
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                        <Label x:Name="PredictionLabel"
+                               Text="Food recognition result will appear here."
+                               FontSize="13"
+                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}"
+                               VerticalOptions="Center"
+                               SemanticProperties.Description="Latest food recognition result" />
+                        <Button x:Name="ReadPredictionButton"
+                                Grid.Column="1"
+                                Text="Read"
+                                IsEnabled="False"
+                                Clicked="OnReadPredictionClicked"
+                                SemanticProperties.Hint="Read the latest food recognition result aloud" />
+                    </Grid>
                 </VerticalStackLayout>
             </Border>
 
