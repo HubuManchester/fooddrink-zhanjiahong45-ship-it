@@ -1,6 +1,6 @@
 # NutriBite
 
-**Author:** <FILL IN: full name + student ID>
+**Author:** TODO: add real full name and student ID before submission
 **App:** NutriBite
 
 NutriBite is a .NET MAUI 9 Food and Drink app for tracking nutrition, meal context, and device-supported interactions. It combines a searchable food catalogue, nutrition detail views, accessibility settings, and a hardware demonstration page with bundled on-device image classification.
@@ -45,7 +45,7 @@ The repository uses `Directory.Build.props` to redirect Windows build output to 
 
 ## Screencast
 
-Screencast link: <add mmutube/Xuexitong link before submission>
+Screencast link: TODO: paste final mmutube/Xuexitong link before submission
 
 Screenshots and submission notes live in `docs/` at the repository root. Add final screenshots there after the human screencast review.
 
@@ -56,4 +56,4 @@ Screenshots and submission notes live in `docs/` at the repository root. Add fin
 - Test large text at 200% and confirm labels/buttons remain usable.
 - Test swipe-to-favourite, category filter, favourites-only filter, and refresh.
 - Test Android phone emulator, Android tablet emulator, and Windows if available.
-- Replace the author placeholder with the real full name and student ID before submission.
+- Replace the TODO author and screencast placeholders with the real submission details before submission.

@@ -1,6 +1,6 @@
 # NutriBite
 
-**Author:** <FILL IN: full name + student ID>
+**Author:** TODO: add real full name and student ID before submission
 **App:** NutriBite
 
 NutriBite is a .NET MAUI 9 Food and Drink coursework app. It tracks foods and drinks, shows nutrition summaries, demonstrates mobile hardware features, and runs bundled on-device image recognition from camera photos.
@@ -32,13 +32,12 @@ The Android target uses min SDK 24 because the bundled ONNX Runtime Android pack
 
 ## Screencast
 
-Screencast link: <add mmutube/Xuexitong link before submission>
+Screencast link: TODO: paste final mmutube/Xuexitong link before submission
 
 Screenshots and submission notes live in `docs/`. Add final screenshots there after the human screencast review.
 
 ## Final Human Submission Steps
 
-1. Replace the author placeholder with the real full name and student ID.
-2. Add the final screencast link above.
-3. Run the final manual review on phone/tablet where available.
-4. Upload the university submission package.
+1. Replace the TODO author and screencast placeholders with the real submission details.
+2. Run the final manual review on phone/tablet where available.
+3. Upload the university submission package.
