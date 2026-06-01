@@ -1,8 +1,10 @@
 <Project>
   <PropertyGroup>
     <DefaultItemExcludes>$(DefaultItemExcludes);bin\**;obj\**</DefaultItemExcludes>
+    <UseSharedCompilation>false</UseSharedCompilation>
+  </PropertyGroup>
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('windows'))">
     <BaseIntermediateOutputPath>C:\MauiBuild\$(MSBuildProjectName)\obj\</BaseIntermediateOutputPath>
     <BaseOutputPath>C:\MauiBuild\$(MSBuildProjectName)\bin\</BaseOutputPath>
-    <UseSharedCompilation>false</UseSharedCompilation>
   </PropertyGroup>
 </Project>

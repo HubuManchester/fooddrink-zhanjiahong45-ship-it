@@ -52,9 +52,9 @@ public partial class HardwarePage : ContentPage
         {
             SetStatus("Camera permission was denied. Enable camera access in device settings.");
         }
-        catch (Exception ex)
+        catch
         {
-            SetStatus($"Camera error: {ex.Message}");
+            SetStatus("Camera capture could not be completed right now.");
         }
     }
 
@@ -80,9 +80,9 @@ public partial class HardwarePage : ContentPage
         {
             SetStatus("Location permission was denied. Enable location access in device settings.");
         }
-        catch (Exception ex)
+        catch
         {
-            SetStatus($"Location error: {ex.Message}");
+            SetStatus("Location could not be loaded right now. Try again after checking device location settings.");
         }
     }
 
@@ -162,9 +162,9 @@ public partial class HardwarePage : ContentPage
             await SpeechService.SpeakAsync(helpText);
             SetStatus("Reading help content aloud.");
         }
-        catch (Exception ex)
+        catch
         {
-            SetStatus($"Text to speech error: {ex.Message}");
+            SetStatus("Text to speech could not start on this device right now.");
         }
     }
 
@@ -184,9 +184,9 @@ public partial class HardwarePage : ContentPage
             FeedbackCountLabel.Text = $"Haptic feedback tests: {feedbackTestCount}";
             SetStatus("Vibration and haptic feedback triggered. The changing counter can be used for screen-recorded verification.");
         }
-        catch (Exception ex)
+        catch
         {
-            SetStatus($"Feedback error: {ex.Message}");
+            SetStatus("Vibration or haptic feedback could not run on this device.");
         }
     }
 

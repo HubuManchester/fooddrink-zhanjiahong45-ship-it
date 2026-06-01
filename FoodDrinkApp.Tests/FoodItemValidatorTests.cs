@@ -1,0 +1,39 @@
+using FoodDrinkApp.Services;
+
+namespace FoodDrinkApp.Tests;
+
+public sealed class FoodItemValidatorTests
+{
+    [Fact]
+    public void Rejects_empty_name()
+    {
+        Assert.False(FoodItemValidator.Validate("", 0, "d", "1", "1", "1", "1").IsValid);
+    }
+
+    [Fact]
+    public void Rejects_missing_category()
+    {
+        Assert.False(FoodItemValidator.Validate("Tea", -1, "d", "1", "1", "1", "1").IsValid);
+    }
+
+    [Fact]
+    public void Rejects_blank_description()
+    {
+        Assert.False(FoodItemValidator.Validate("Tea", 0, "", "1", "1", "1", "1").IsValid);
+    }
+
+    [Theory]
+    [InlineData("-5")]
+    [InlineData("abc")]
+    [InlineData("")]
+    public void Rejects_bad_calories(string calories)
+    {
+        Assert.False(FoodItemValidator.Validate("Tea", 0, "d", calories, "1", "1", "1").IsValid);
+    }
+
+    [Fact]
+    public void Accepts_valid_input()
+    {
+        Assert.True(FoodItemValidator.Validate("Tea", 0, "Green tea", "1", "0", "2", "0").IsValid);
+    }
+}

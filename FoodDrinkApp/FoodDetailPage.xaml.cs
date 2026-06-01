@@ -67,9 +67,9 @@ public partial class FoodDetailPage : ContentPage
         {
             await SpeechService.SpeakAsync(currentItem.AccessibleSummary);
         }
-        catch (Exception ex)
+        catch
         {
-            await DisplayAlert("Text to speech unavailable", ex.Message, "OK");
+            await DisplayAlert("Text to speech unavailable", "This device could not read the summary aloud right now.", "OK");
         }
     }
 
@@ -87,9 +87,9 @@ public partial class FoodDetailPage : ContentPage
             HapticFeedback.Default.Perform(HapticFeedbackType.LongPress);
             await DisplayAlert("Reminder", "Vibration feedback has been triggered.", "OK");
         }
-        catch (Exception ex)
+        catch
         {
-            await DisplayAlert("Vibration unavailable", ex.Message, "OK");
+            await DisplayAlert("Vibration unavailable", "This device could not trigger vibration feedback right now.", "OK");
         }
     }
 }

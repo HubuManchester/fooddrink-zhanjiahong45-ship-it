@@ -24,7 +24,7 @@
 		<ApplicationTitle>NutriBite</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.student.nutritrack</ApplicationId>
+		<ApplicationId>com.nutribite.app</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -62,6 +62,10 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.8" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\FoodDrinkApp.Core\FoodDrinkApp.Core.csproj" />
 	</ItemGroup>
 
 </Project>

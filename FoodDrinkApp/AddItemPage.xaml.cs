@@ -56,9 +56,9 @@ public partial class AddItemPage : ContentPage
 
             await Shell.Current.GoToAsync("..");
         }
-        catch (Exception ex)
+        catch
         {
-            ShowValidation($"The record could not be saved: {ex.Message}");
+            ShowValidation("The record could not be saved right now. Please check your connection and try again.");
         }
     }
 
@@ -66,35 +66,25 @@ public partial class AddItemPage : ContentPage
     {
         calories = protein = carbs = fat = 0;
 
-        if (string.IsNullOrWhiteSpace(NameEntry.Text))
+        var validation = FoodItemValidator.Validate(
+            NameEntry.Text,
+            CategoryPicker.SelectedIndex,
+            DescriptionEditor.Text,
+            CaloriesEntry.Text,
+            ProteinEntry.Text,
+            CarbsEntry.Text,
+            FatEntry.Text);
+
+        if (!validation.IsValid)
         {
-            return "Please enter a food or drink name.";
+            return validation.Message;
         }
 
-        if (CategoryPicker.SelectedIndex < 0)
-        {
-            return "Please choose a category.";
-        }
-
-        if (string.IsNullOrWhiteSpace(DescriptionEditor.Text))
-        {
-            return "Please add a short description.";
-        }
-
-        return TryReadNumber(CaloriesEntry.Text, "calories", out calories)
-            ?? TryReadNumber(ProteinEntry.Text, "protein", out protein)
-            ?? TryReadNumber(CarbsEntry.Text, "carbs", out carbs)
-            ?? TryReadNumber(FatEntry.Text, "fat", out fat);
-    }
-
-    private static string? TryReadNumber(string? value, string fieldName, out int number)
-    {
-        if (int.TryParse(value, out number) && number >= 0)
-        {
-            return null;
-        }
-
-        return $"Please enter a valid non-negative number for {fieldName}.";
+        calories = int.Parse(CaloriesEntry.Text!);
+        protein = int.Parse(ProteinEntry.Text!);
+        carbs = int.Parse(CarbsEntry.Text!);
+        fat = int.Parse(FatEntry.Text!);
+        return null;
     }
 
     private void ShowValidation(string message)
