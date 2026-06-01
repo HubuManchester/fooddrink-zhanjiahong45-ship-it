@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using SQLite;
 
 namespace FoodDrinkApp.Models;
 
@@ -7,6 +8,11 @@ namespace FoodDrinkApp.Models;
 /// </summary>
 public sealed class FoodItem
 {
+    [PrimaryKey, AutoIncrement]
+    [JsonIgnore]
+    public int LocalId { get; set; }
+
+    [Indexed]
     [JsonPropertyName("id")]
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
 

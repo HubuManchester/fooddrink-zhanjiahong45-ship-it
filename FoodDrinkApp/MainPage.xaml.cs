@@ -30,7 +30,8 @@ public partial class MainPage : ContentPage
             LoadingIndicator.IsRunning = true;
             UpdateStatus("Loading foods...");
 
-            loadedItems = await FoodCatalogService.SearchAsync(query);
+            var repository = await AppDataService.GetRepositoryAsync();
+            loadedItems = await repository.SearchAsync(query);
             UpdateCategoryOptions(loadedItems);
             ApplyFilters();
         }
@@ -71,6 +72,36 @@ public partial class MainPage : ContentPage
         await LoadFoodItemsAsync(SearchFoodBar.Text);
     }
 
+    private async void OnDeleteInvoked(object? sender, EventArgs e)
+    {
+        if (sender is not SwipeItem swipeItem || swipeItem.CommandParameter is not string id)
+        {
+            return;
+        }
+
+        var item = loadedItems.FirstOrDefault(food => food.Id == id);
+        var itemName = item?.Name ?? "this record";
+        var confirmed = await DisplayAlert("Delete record", $"Delete {itemName}?", "Delete", "Cancel");
+        if (!confirmed)
+        {
+            return;
+        }
+
+        try
+        {
+            var repository = await AppDataService.GetRepositoryAsync();
+            var deleted = await repository.DeleteByIdAsync(id);
+            favoriteItemIds.Remove(id);
+            await LoadFoodItemsAsync(SearchFoodBar.Text);
+            UpdateStatus(deleted ? $"{itemName} deleted." : $"{itemName} was already removed.", announce: true);
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("Delete local food record", ex);
+            UpdateStatus("The record could not be deleted right now.", announce: true);
+        }
+    }
+
     private void OnCategoryChanged(object? sender, EventArgs e)
     {
         if (!updatingCategoryPicker)
@@ -108,10 +139,20 @@ public partial class MainPage : ContentPage
 
     private async void OnRefreshing(object? sender, EventArgs e)
     {
+        var imported = 0;
+        try
+        {
+            imported = await AppDataService.ImportCatalogAsync();
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("Import food catalog into local database", ex);
+        }
+
         await LoadFoodItemsAsync(SearchFoodBar.Text);
         FoodRefreshView.IsRefreshing = false;
         var source = FoodCatalogService.LastLoadUsedMockApi ? "mockapi.io" : "local fallback data";
-        UpdateStatus($"Food and drink list refreshed. Current source: {source}.", announce: true);
+        UpdateStatus($"Food and drink list refreshed from {source}; {imported} records synced to local database.", announce: true);
     }
 
     private void UpdateCategoryOptions(IReadOnlyList<FoodItem> items)
@@ -146,8 +187,7 @@ public partial class MainPage : ContentPage
 
         FoodCollection.ItemsSource = visibleItems;
 
-        var source = FoodCatalogService.LastLoadUsedMockApi ? "mockapi.io" : "local fallback";
-        UpdateStatus($"{visibleItems.Count} shown from {loadedItems.Count} foods. Source: {source}.");
+        UpdateStatus($"{visibleItems.Count} shown from {loadedItems.Count} foods. Source: local SQLite database.");
     }
 
     private void UpdateStatus(string message, bool announce = false)

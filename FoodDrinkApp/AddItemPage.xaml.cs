@@ -3,17 +3,35 @@ using FoodDrinkApp.Services;
 
 namespace FoodDrinkApp;
 
+[QueryProperty(nameof(ItemId), "id")]
 public partial class AddItemPage : ContentPage
 {
+    private FoodItem? editingItem;
+    private string? pendingItemId;
+
     public AddItemPage()
     {
         InitializeComponent();
     }
 
-    protected override void OnAppearing()
+    public string ItemId
+    {
+        set
+        {
+            pendingItemId = value;
+            _ = LoadEditItemAsync(value);
+        }
+    }
+
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
         AccessibilityService.ApplyFontScale(this);
+
+        if (!string.IsNullOrWhiteSpace(pendingItemId) && editingItem is null)
+        {
+            await LoadEditItemAsync(pendingItemId);
+        }
     }
 
     private async void OnSaveClicked(object? sender, EventArgs e)
@@ -28,30 +46,28 @@ public partial class AddItemPage : ContentPage
                 return;
             }
 
-            var item = new FoodItem
-            {
-                Name = NameEntry.Text!.Trim(),
-                Category = CategoryPicker.SelectedItem?.ToString() ?? "Snack",
-                Description = DescriptionEditor.Text!.Trim(),
-                Calories = calories,
-                Protein = protein,
-                Carbs = carbs,
-                Fat = fat,
-                AllergyNote = string.IsNullOrWhiteSpace(AllergyEntry.Text)
-                    ? "No allergy note provided."
-                    : AllergyEntry.Text.Trim(),
-                Tags = $"{NameEntry.Text} {CategoryPicker.SelectedItem} {DescriptionEditor.Text}"
-            };
+            var item = BuildFoodItem(calories, protein, carbs, fat);
+            var repository = await AppDataService.GetRepositoryAsync();
 
-            await FoodCatalogService.AddAsync(item);
+            if (editingItem is null)
+            {
+                await repository.AddAsync(item);
+            }
+            else
+            {
+                item.LocalId = editingItem.LocalId;
+                item.Id = editingItem.Id;
+                await repository.UpdateAsync(item);
+            }
+
             HapticFeedback.Default.Perform(HapticFeedbackType.Click);
-            SemanticScreenReader.Announce("Food record saved.");
+            SemanticScreenReader.Announce(editingItem is null ? "Food record saved." : "Food record updated.");
 
             await DisplayAlert(
-                "Saved",
-                MockApiConfig.IsConfigured
-                    ? "The record has been saved to mockapi.io."
-                    : "The record has been saved to local fallback data.",
+                editingItem is null ? "Saved" : "Updated",
+                editingItem is null
+                    ? "The record has been saved to the local database."
+                    : "The record has been updated in the local database.",
                 "OK");
 
             await Shell.Current.GoToAsync("..");
@@ -61,6 +77,73 @@ public partial class AddItemPage : ContentPage
             AppLog.Error("Save food record", ex);
             ShowValidation("The record could not be saved right now. Please check your connection and try again.");
         }
+    }
+
+    private async Task LoadEditItemAsync(string? id)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            return;
+        }
+
+        try
+        {
+            var repository = await AppDataService.GetRepositoryAsync();
+            editingItem = await repository.GetByIdAsync(id);
+            if (editingItem is null)
+            {
+                ShowValidation("The selected record could not be loaded for editing.");
+                return;
+            }
+
+            Title = "Edit Record";
+            FormTitleLabel.Text = "Edit food or drink";
+            FormSubtitleLabel.Text = "Update the saved nutrition details.";
+            SaveButton.Text = "Update record";
+
+            NameEntry.Text = editingItem.Name;
+            SelectCategory(editingItem.Category);
+            DescriptionEditor.Text = editingItem.Description;
+            CaloriesEntry.Text = editingItem.Calories.ToString();
+            ProteinEntry.Text = editingItem.Protein.ToString();
+            CarbsEntry.Text = editingItem.Carbs.ToString();
+            FatEntry.Text = editingItem.Fat.ToString();
+            AllergyEntry.Text = editingItem.AllergyNote;
+            ValidationPanel.IsVisible = false;
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("Load food record for editing", ex);
+            ShowValidation("The selected record could not be loaded for editing.");
+        }
+    }
+
+    private FoodItem BuildFoodItem(int calories, int protein, int carbs, int fat) =>
+        new()
+        {
+            Name = NameEntry.Text!.Trim(),
+            Category = CategoryPicker.SelectedItem?.ToString() ?? "Snack",
+            Description = DescriptionEditor.Text!.Trim(),
+            Calories = calories,
+            Protein = protein,
+            Carbs = carbs,
+            Fat = fat,
+            AllergyNote = string.IsNullOrWhiteSpace(AllergyEntry.Text)
+                ? "No allergy note provided."
+                : AllergyEntry.Text.Trim(),
+            Tags = $"{NameEntry.Text} {CategoryPicker.SelectedItem} {DescriptionEditor.Text}"
+        };
+
+    private void SelectCategory(string category)
+    {
+        var index = CategoryPicker.Items.IndexOf(category);
+        if (index < 0)
+        {
+            CategoryPicker.Items.Add(category);
+            index = CategoryPicker.Items.Count - 1;
+        }
+
+        CategoryPicker.SelectedIndex = index;
     }
 
     private string? ValidateForm(out int calories, out int protein, out int carbs, out int fat)

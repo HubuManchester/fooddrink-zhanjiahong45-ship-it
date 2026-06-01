@@ -78,7 +78,7 @@
                 </Grid>
             </Border>
 
-            <Grid x:Name="ActionPanel" ColumnDefinitions="*,*" ColumnSpacing="12">
+            <Grid x:Name="ActionPanel" ColumnDefinitions="*,*,*" ColumnSpacing="12">
                 <Button Text="Read summary"
                         Clicked="OnSpeakClicked"
                         SemanticProperties.Hint="Read the nutrition summary aloud" />
@@ -90,6 +90,10 @@
                         TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentB}}"
                         Clicked="OnStopSpeechClicked"
                         SemanticProperties.Hint="Stop the current speech" />
+                <Button Grid.Column="2"
+                        Text="Edit"
+                        Clicked="OnEditClicked"
+                        SemanticProperties.Hint="Edit this food or drink record" />
             </Grid>
 
             <Button Text="Vibration reminder"

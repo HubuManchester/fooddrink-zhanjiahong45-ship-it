@@ -10,10 +10,12 @@
         <VerticalStackLayout Padding="{OnIdiom Phone='20,18,20,24', Tablet='34,26,34,30', Desktop='42,28,42,34'}" Spacing="16">
             <Border Style="{StaticResource HeroCard}">
                 <Grid RowDefinitions="Auto,Auto" RowSpacing="6">
-                    <Label Text="Add food or drink"
+                    <Label x:Name="FormTitleLabel"
+                           Text="Add food or drink"
                            Style="{StaticResource Display1}"
                            SemanticProperties.HeadingLevel="Level1" />
-                    <Label Grid.Row="1"
+                    <Label x:Name="FormSubtitleLabel"
+                           Grid.Row="1"
                            Text="Record the full details of a meal worth remembering."
                            Style="{StaticResource BodyText}" />
                 </Grid>
@@ -94,7 +96,8 @@
                        FontAttributes="Bold" />
             </Border>
 
-            <Button Text="Save record"
+            <Button x:Name="SaveButton"
+                    Text="Save record"
                     FontAttributes="Bold"
                     Clicked="OnSaveClicked"
                     SemanticProperties.Hint="Validate and save this record" />

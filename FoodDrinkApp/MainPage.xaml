@@ -137,12 +137,16 @@
                         <SwipeView>
                             <SwipeView.RightItems>
                                 <SwipeItems Mode="Execute">
-                                    <SwipeItem Text="Favorite"
-                                               BackgroundColor="{StaticResource AccentFreshL}"
-                                               Invoked="OnFavoriteInvoked"
-                                               CommandParameter="{Binding Id}" />
-                                </SwipeItems>
-                            </SwipeView.RightItems>
+                                     <SwipeItem Text="Favorite"
+                                                BackgroundColor="{StaticResource AccentFreshL}"
+                                                Invoked="OnFavoriteInvoked"
+                                                CommandParameter="{Binding Id}" />
+                                     <SwipeItem Text="Delete"
+                                                BackgroundColor="{StaticResource WarningTextL}"
+                                                Invoked="OnDeleteInvoked"
+                                                CommandParameter="{Binding Id}" />
+                                 </SwipeItems>
+                             </SwipeView.RightItems>
                             <Border Style="{StaticResource GlassCard}"
                                     Padding="0"
                                     Margin="0,0,0,12">

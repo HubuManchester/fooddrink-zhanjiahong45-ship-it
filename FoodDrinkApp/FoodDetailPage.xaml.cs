@@ -8,6 +8,7 @@ public partial class FoodDetailPage : ContentPage
 {
     private readonly MacroRingDrawable macroRingDrawable = new();
     private FoodItem? currentItem;
+    private string? currentItemId;
 
     public FoodDetailPage()
     {
@@ -19,6 +20,11 @@ public partial class FoodDetailPage : ContentPage
     {
         base.OnAppearing();
         AccessibilityService.ApplyFontScale(this);
+        if (!string.IsNullOrWhiteSpace(currentItemId))
+        {
+            _ = LoadItemAsync(currentItemId);
+        }
+
         _ = AnimateEntranceAsync();
     }
 
@@ -30,12 +36,17 @@ public partial class FoodDetailPage : ContentPage
 
     public string ItemId
     {
-        set => _ = LoadItemAsync(value);
+        set
+        {
+            currentItemId = value;
+            _ = LoadItemAsync(value);
+        }
     }
 
     private async Task LoadItemAsync(string id)
     {
-        currentItem = await FoodCatalogService.GetByIdAsync(id);
+        var repository = await AppDataService.GetRepositoryAsync();
+        currentItem = await repository.GetByIdAsync(id);
         BindingContext = currentItem;
         RenderItem();
     }
@@ -116,6 +127,17 @@ public partial class FoodDetailPage : ContentPage
     {
         SpeechService.Stop();
         SemanticScreenReader.Announce("Reading stopped.");
+    }
+
+    private async void OnEditClicked(object? sender, EventArgs e)
+    {
+        if (currentItem is null)
+        {
+            await DisplayAlert("Missing record", "There is no record to edit.", "OK");
+            return;
+        }
+
+        await Shell.Current.GoToAsync($"{nameof(AddItemPage)}?id={Uri.EscapeDataString(currentItem.Id)}");
     }
 
     private async void OnVibrateClicked(object? sender, EventArgs e)
