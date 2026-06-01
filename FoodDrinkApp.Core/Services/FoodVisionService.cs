@@ -24,6 +24,9 @@ public sealed class FoodVisionService : IDisposable
     private readonly IReadOnlyList<string> labels;
     private bool disposed;
 
+    /// <summary>
+    /// Creates an ONNX inference session from bundled model bytes and display labels.
+    /// </summary>
     public FoodVisionService(byte[] modelBytes, IReadOnlyList<string> labels)
     {
         ArgumentNullException.ThrowIfNull(modelBytes);
@@ -44,6 +47,9 @@ public sealed class FoodVisionService : IDisposable
         this.labels = labels;
     }
 
+    /// <summary>
+    /// Runs image classification and returns the highest-confidence prediction.
+    /// </summary>
     public Prediction Classify(byte[] imageBytes, int size = 224)
     {
         ObjectDisposedException.ThrowIf(disposed, this);
@@ -67,6 +73,9 @@ public sealed class FoodVisionService : IDisposable
         return new Prediction(LabelFor(index, probabilities.Length), confidence);
     }
 
+    /// <summary>
+    /// Converts image bytes into the normalised tensor shape expected by MobileNet.
+    /// </summary>
     public static DenseTensor<float> CreateInputTensor(byte[] imageBytes, int size = 224)
     {
         ArgumentNullException.ThrowIfNull(imageBytes);
@@ -108,6 +117,9 @@ public sealed class FoodVisionService : IDisposable
         return tensor;
     }
 
+    /// <summary>
+    /// Releases the ONNX inference session.
+    /// </summary>
     public void Dispose()
     {
         if (disposed)

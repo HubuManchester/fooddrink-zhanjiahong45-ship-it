@@ -7,6 +7,9 @@ namespace FoodDrinkApp.Services;
 /// </summary>
 public static class FoodFilterService
 {
+    /// <summary>
+    /// Applies the selected category and favourite-only state to an existing item list.
+    /// </summary>
     public static IReadOnlyList<FoodItem> Apply(
         IReadOnlyList<FoodItem> items,
         string? category,

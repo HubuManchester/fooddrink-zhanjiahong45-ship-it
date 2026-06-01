@@ -7,6 +7,9 @@ namespace FoodDrinkApp.Services;
 /// </summary>
 public static class MealSuggestionService
 {
+    /// <summary>
+    /// Picks one available catalogue item for the shake-to-suggest feature.
+    /// </summary>
     public static FoodItem PickRandom(IReadOnlyList<FoodItem> items, Random rng)
     {
         ArgumentNullException.ThrowIfNull(items);

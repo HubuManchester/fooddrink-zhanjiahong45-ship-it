@@ -4,6 +4,9 @@ using FoodDrinkApp.Models;
 
 namespace FoodDrinkApp.Services;
 
+/// <summary>
+/// Loads, searches, and creates food records using MockAPI when configured and local fallback data otherwise.
+/// </summary>
 public static class FoodCatalogService
 {
     private static readonly HttpClient HttpClient = new()
@@ -70,8 +73,14 @@ public static class FoodCatalogService
 
     private static List<FoodItem> cachedItems = new(LocalFallbackItems);
 
+    /// <summary>
+    /// Gets whether the most recent catalogue load used the remote MockAPI endpoint.
+    /// </summary>
     public static bool LastLoadUsedMockApi { get; private set; }
 
+    /// <summary>
+    /// Searches the available catalogue by name, category, description, or tags.
+    /// </summary>
     public static async Task<IReadOnlyList<FoodItem>> SearchAsync(string? query)
     {
         var items = await GetAllAsync();
@@ -92,6 +101,9 @@ public static class FoodCatalogService
             .ToList();
     }
 
+    /// <summary>
+    /// Gets a single food item from MockAPI when available, falling back to the local cache.
+    /// </summary>
     public static async Task<FoodItem?> GetByIdAsync(string id)
     {
         if (MockApiConfig.IsConfigured)
@@ -128,6 +140,9 @@ public static class FoodCatalogService
         return cachedItems.FirstOrDefault(item => item.Id == id);
     }
 
+    /// <summary>
+    /// Adds a new food item to MockAPI when configured or to the local cache otherwise.
+    /// </summary>
     public static async Task<FoodItem> AddAsync(FoodItem item)
     {
         if (MockApiConfig.IsConfigured)

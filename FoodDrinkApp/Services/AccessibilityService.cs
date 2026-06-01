@@ -2,18 +2,30 @@ using System.Runtime.CompilerServices;
 
 namespace FoodDrinkApp.Services;
 
+/// <summary>
+/// Applies the coursework large-text setting across MAUI visual trees.
+/// </summary>
 public static class AccessibilityService
 {
     private static readonly ConditionalWeakTable<BindableObject, FontSizeStore> OriginalFontSizes = new();
 
+    /// <summary>
+    /// Gets or sets the selected text scale option from Settings.
+    /// </summary>
     public static int TextScaleLevel { get; set; }
 
+    /// <summary>
+    /// Gets or sets whether any large-text option is active.
+    /// </summary>
     public static bool LargeTextEnabled
     {
         get => TextScaleLevel > 0;
         set => TextScaleLevel = value ? Math.Max(TextScaleLevel, 1) : 0;
     }
 
+    /// <summary>
+    /// Gets the numeric multiplier for the current text scale level.
+    /// </summary>
     public static double CurrentTextScale => TextScaleLevel switch
     {
         1 => 1.35,
@@ -22,6 +34,9 @@ public static class AccessibilityService
         _ => 1.0
     };
 
+    /// <summary>
+    /// Applies the current text scale to labels, buttons, inputs, pickers, and search bars under the supplied root.
+    /// </summary>
     public static void ApplyFontScale(Element root)
     {
         ApplyToElement(root);

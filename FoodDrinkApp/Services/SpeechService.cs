@@ -1,9 +1,15 @@
 namespace FoodDrinkApp.Services;
 
+/// <summary>
+/// Provides a single cancellable text-to-speech channel for app narration.
+/// </summary>
 public static class SpeechService
 {
     private static CancellationTokenSource? currentSpeech;
 
+    /// <summary>
+    /// Speaks text using an English locale when one is available.
+    /// </summary>
     public static async Task SpeakAsync(string text)
     {
         Stop();
@@ -25,8 +31,14 @@ public static class SpeechService
         }
     }
 
+    /// <summary>
+    /// Compatibility wrapper for older call sites that requested Chinese speech.
+    /// </summary>
     public static Task SpeakChineseAsync(string text) => SpeakAsync(text);
 
+    /// <summary>
+    /// Cancels and disposes any active text-to-speech request.
+    /// </summary>
     public static void Stop()
     {
         if (currentSpeech is null)

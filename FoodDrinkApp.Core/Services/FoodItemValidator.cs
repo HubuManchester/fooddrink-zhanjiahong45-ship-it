@@ -13,6 +13,9 @@ public static class FoodItemValidator
     private const int MaxCalories = 5000;
     private const int MaxMacroGrams = 1000;
 
+    /// <summary>
+    /// Validates user-entered form text before the MAUI page creates a food item.
+    /// </summary>
     public static ValidationResult Validate(
         string? name,
         int categoryIndex,

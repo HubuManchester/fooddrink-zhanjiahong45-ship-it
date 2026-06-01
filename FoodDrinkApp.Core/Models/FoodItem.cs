@@ -2,6 +2,9 @@ using System.Text.Json.Serialization;
 
 namespace FoodDrinkApp.Models;
 
+/// <summary>
+/// Represents a food or drink record shown by the catalogue and detail pages.
+/// </summary>
 public sealed class FoodItem
 {
     [JsonPropertyName("id")]
@@ -34,12 +37,21 @@ public sealed class FoodItem
     [JsonPropertyName("tags")]
     public string Tags { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Gets calories formatted for compact UI labels.
+    /// </summary>
     [JsonIgnore]
     public string CaloriesLabel => $"{Calories} kcal";
 
+    /// <summary>
+    /// Gets a concise macronutrient summary.
+    /// </summary>
     [JsonIgnore]
     public string MacroSummary => $"Protein {Protein}g, carbs {Carbs}g, fat {Fat}g";
 
+    /// <summary>
+    /// Gets a screen-reader-friendly nutrition summary.
+    /// </summary>
     [JsonIgnore]
     public string AccessibleSummary => $"{Name}. {Category}. {Calories} kcal. {MacroSummary}. {AllergyNote}";
 }

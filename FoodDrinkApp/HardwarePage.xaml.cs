@@ -6,9 +6,8 @@ namespace FoodDrinkApp;
 public partial class HardwarePage : ContentPage
 {
     private int feedbackTestCount;
-    private bool accelerometerReadoutEnabled;
-    private bool shakeSuggestionEnabled;
     private bool flashlightOn;
+    private readonly SensorMonitorService sensorMonitor = new();
     private FoodVisionService? foodVisionService;
     private Prediction? latestPrediction;
     private readonly Random suggestionRandom = new();
@@ -231,26 +230,22 @@ public partial class HardwarePage : ContentPage
     {
         try
         {
-            if (!Accelerometer.Default.IsSupported)
+            if (!sensorMonitor.IsAccelerometerSupported)
             {
                 SetStatus("Accelerometer is not available on this device.");
                 return;
             }
 
-            if (!accelerometerReadoutEnabled)
+            if (!sensorMonitor.AccelerometerReadoutEnabled)
             {
-                Accelerometer.Default.ReadingChanged += OnAccelerometerReadingChanged;
-                accelerometerReadoutEnabled = true;
-                EnsureAccelerometerRunning();
+                sensorMonitor.StartAccelerometerReadout(OnAccelerometerReadingChanged);
                 AccelerometerButton.Text = "Stop";
                 SetStatus("Accelerometer started. Tilt the device to see values change.");
             }
             else
             {
-                Accelerometer.Default.ReadingChanged -= OnAccelerometerReadingChanged;
-                accelerometerReadoutEnabled = false;
+                sensorMonitor.StopAccelerometerReadout(OnAccelerometerReadingChanged);
                 AccelerometerButton.Text = "Start";
-                StopAccelerometerIfUnused();
                 SetStatus("Accelerometer stopped.");
             }
         }
@@ -269,7 +264,7 @@ public partial class HardwarePage : ContentPage
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            AccelLabel.Text = SensorFormatter.Vector3("Acceleration", e.Reading.Acceleration);
+            AccelLabel.Text = SensorMonitorService.FormatAcceleration(e);
         });
     }
 
@@ -277,23 +272,21 @@ public partial class HardwarePage : ContentPage
     {
         try
         {
-            if (!Compass.Default.IsSupported)
+            if (!sensorMonitor.IsCompassSupported)
             {
                 SetStatus("Compass is not available on this device.");
                 return;
             }
 
-            if (!Compass.Default.IsMonitoring)
+            if (!sensorMonitor.IsCompassMonitoring)
             {
-                Compass.Default.ReadingChanged += OnCompassReadingChanged;
-                Compass.Default.Start(SensorSpeed.UI);
+                SensorMonitorService.StartCompass(OnCompassReadingChanged);
                 CompassButton.Text = "Stop";
                 SetStatus("Compass started. Rotate the device to see the heading change.");
             }
             else
             {
-                Compass.Default.ReadingChanged -= OnCompassReadingChanged;
-                Compass.Default.Stop();
+                SensorMonitorService.StopCompass(OnCompassReadingChanged);
                 CompassButton.Text = "Start";
                 SetStatus("Compass stopped.");
             }
@@ -313,7 +306,7 @@ public partial class HardwarePage : ContentPage
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            CompassLabel.Text = SensorFormatter.Heading(e.Reading.HeadingMagneticNorth);
+            CompassLabel.Text = SensorMonitorService.FormatHeading(e);
         });
     }
 
@@ -321,23 +314,21 @@ public partial class HardwarePage : ContentPage
     {
         try
         {
-            if (!Gyroscope.Default.IsSupported)
+            if (!sensorMonitor.IsGyroscopeSupported)
             {
                 SetStatus("Gyroscope is not available on this device.");
                 return;
             }
 
-            if (!Gyroscope.Default.IsMonitoring)
+            if (!sensorMonitor.IsGyroscopeMonitoring)
             {
-                Gyroscope.Default.ReadingChanged += OnGyroscopeReadingChanged;
-                Gyroscope.Default.Start(SensorSpeed.UI);
+                SensorMonitorService.StartGyroscope(OnGyroscopeReadingChanged);
                 GyroscopeButton.Text = "Stop";
                 SetStatus("Gyroscope started. Rotate the device to see angular velocity.");
             }
             else
             {
-                Gyroscope.Default.ReadingChanged -= OnGyroscopeReadingChanged;
-                Gyroscope.Default.Stop();
+                SensorMonitorService.StopGyroscope(OnGyroscopeReadingChanged);
                 GyroscopeButton.Text = "Start";
                 SetStatus("Gyroscope stopped.");
             }
@@ -357,7 +348,7 @@ public partial class HardwarePage : ContentPage
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            GyroLabel.Text = SensorFormatter.Vector3("Angular velocity", e.Reading.AngularVelocity);
+            GyroLabel.Text = SensorMonitorService.FormatAngularVelocity(e);
         });
     }
 
@@ -397,26 +388,22 @@ public partial class HardwarePage : ContentPage
     {
         try
         {
-            if (!Accelerometer.Default.IsSupported)
+            if (!sensorMonitor.IsAccelerometerSupported)
             {
                 SetStatus("Shake suggestions need an accelerometer, which is not available on this device.");
                 return;
             }
 
-            if (!shakeSuggestionEnabled)
+            if (!sensorMonitor.ShakeSuggestionEnabled)
             {
-                Accelerometer.Default.ShakeDetected += OnShakeDetected;
-                shakeSuggestionEnabled = true;
-                EnsureAccelerometerRunning();
+                sensorMonitor.StartShakeSuggestion(OnShakeDetected);
                 ShakeButton.Text = "Disable";
                 SetStatus("Shake suggestions enabled. Shake the device to pick a meal.");
             }
             else
             {
-                Accelerometer.Default.ShakeDetected -= OnShakeDetected;
-                shakeSuggestionEnabled = false;
+                sensorMonitor.StopShakeSuggestion(OnShakeDetected);
                 ShakeButton.Text = "Enable";
-                StopAccelerometerIfUnused();
                 SetStatus("Shake suggestions disabled.");
             }
         }
@@ -450,22 +437,6 @@ public partial class HardwarePage : ContentPage
         }
     }
 
-    private void EnsureAccelerometerRunning()
-    {
-        if (!Accelerometer.Default.IsMonitoring)
-        {
-            Accelerometer.Default.Start(SensorSpeed.UI);
-        }
-    }
-
-    private void StopAccelerometerIfUnused()
-    {
-        if (!accelerometerReadoutEnabled && !shakeSuggestionEnabled && Accelerometer.Default.IsMonitoring)
-        {
-            Accelerometer.Default.Stop();
-        }
-    }
-
     private async Task TurnFlashlightOffAsync()
     {
         if (!flashlightOn)
@@ -490,34 +461,11 @@ public partial class HardwarePage : ContentPage
     {
         try
         {
-            if (accelerometerReadoutEnabled)
-            {
-                Accelerometer.Default.ReadingChanged -= OnAccelerometerReadingChanged;
-                accelerometerReadoutEnabled = false;
-            }
-
-            if (shakeSuggestionEnabled)
-            {
-                Accelerometer.Default.ShakeDetected -= OnShakeDetected;
-                shakeSuggestionEnabled = false;
-            }
-
-            if (Accelerometer.Default.IsSupported && Accelerometer.Default.IsMonitoring)
-            {
-                Accelerometer.Default.Stop();
-            }
-
-            if (Compass.Default.IsSupported && Compass.Default.IsMonitoring)
-            {
-                Compass.Default.ReadingChanged -= OnCompassReadingChanged;
-                Compass.Default.Stop();
-            }
-
-            if (Gyroscope.Default.IsSupported && Gyroscope.Default.IsMonitoring)
-            {
-                Gyroscope.Default.ReadingChanged -= OnGyroscopeReadingChanged;
-                Gyroscope.Default.Stop();
-            }
+            sensorMonitor.StopAll(
+                OnAccelerometerReadingChanged,
+                OnShakeDetected,
+                OnCompassReadingChanged,
+                OnGyroscopeReadingChanged);
         }
         catch (Exception ex)
         {
