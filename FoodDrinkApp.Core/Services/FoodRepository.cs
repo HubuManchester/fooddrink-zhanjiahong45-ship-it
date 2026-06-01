@@ -141,6 +141,20 @@ public sealed class FoodRepository
         return changed;
     }
 
+    /// <summary>
+    /// Closes the SQLite connection, mainly for deterministic cleanup in tests.
+    /// </summary>
+    public async Task CloseAsync()
+    {
+        if (database is null)
+        {
+            return;
+        }
+
+        await database.CloseAsync();
+        database = null;
+    }
+
     private SQLiteAsyncConnection Database =>
         database ?? throw new InvalidOperationException("FoodRepository.InitAsync must be called before use.");
 
