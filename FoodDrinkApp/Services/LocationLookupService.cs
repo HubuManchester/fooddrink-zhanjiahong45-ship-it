@@ -44,7 +44,7 @@ public sealed class LocationLookupService
     /// Formats coordinates with stable precision for visual and screen-reader output.
     /// </summary>
     public static string FormatCoordinates(Location location) =>
-        $"Latitude {location.Latitude:F5}, longitude {location.Longitude:F5}";
+        LocationTextFormatter.FormatCoordinates(location.Latitude, location.Longitude);
 
     /// <summary>
     /// Builds display address text from reverse geocoding, falling back to known demo regions.
@@ -98,29 +98,6 @@ public sealed class LocationLookupService
     /// <summary>
     /// Provides deterministic fallback text for emulator coordinates when geocoding is unavailable.
     /// </summary>
-    public static string BuildFallbackAddress(Location location)
-    {
-        if (IsNear(location, 37.422, -122.084, 0.08))
-        {
-            return "United States / California / Mountain View";
-        }
-
-        if (location.Latitude is >= 37.0 and <= 38.2 && location.Longitude is >= -123.2 and <= -121.5)
-        {
-            return "United States / California / San Francisco Bay Area";
-        }
-
-        if (location.Latitude is >= 18 and <= 54 && location.Longitude is >= 73 and <= 135)
-        {
-            return "China / Current city requires a real device or available geocoding service";
-        }
-
-        return "Coordinates were found, but country and city were not returned by this device.";
-    }
-
-    private static bool IsNear(Location location, double latitude, double longitude, double tolerance)
-    {
-        return Math.Abs(location.Latitude - latitude) <= tolerance &&
-               Math.Abs(location.Longitude - longitude) <= tolerance;
-    }
+    public static string BuildFallbackAddress(Location location) =>
+        LocationTextFormatter.BuildFallbackAddress(location.Latitude, location.Longitude);
 }
