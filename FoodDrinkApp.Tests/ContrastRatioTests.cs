@@ -5,21 +5,24 @@ namespace FoodDrinkApp.Tests;
 public sealed class ContrastRatioTests
 {
     [Theory]
-    [InlineData("#3A2518", "#FFFDF8")]
-    [InlineData("#6E5A47", "#FFFFFA")]
-    [InlineData("#3A2518", "#FFF4E3")]
-    [InlineData("#FFF2DF", "#1A1712")]
-    [InlineData("#D8C4AC", "#1A1712")]
+    [InlineData("#F4EEE6", "#0D0C0F")]
+    [InlineData("#BFB7C7", "#0D0C0F")]
+    [InlineData("#F4EEE6", "#17151B")]
+    [InlineData("#BFB7C7", "#17151B")]
+    [InlineData("#241F1A", "#FBF6EF")]
+    [InlineData("#5A5048", "#FFFFFF")]
+    [InlineData("#5A5048", "#FBF6EF")]
     public void Body_text_pairs_meet_wcag_aa(string text, string background)
     {
         Assert.True(ContrastRatio.Between(text, background) >= 4.5);
     }
 
     [Theory]
-    [InlineData("#D9472B", "#FFFFFA")]
-    [InlineData("#2F7A4F", "#FFFFFA")]
-    [InlineData("#FFB15D", "#1A1712")]
-    [InlineData("#8CE6A1", "#1A1712")]
+    [InlineData("#FF6A3D", "#0D0C0F")]
+    [InlineData("#FFB23D", "#0D0C0F")]
+    [InlineData("#3DE0C0", "#0D0C0F")]
+    [InlineData("#D24E22", "#FFFFFF")]
+    [InlineData("#0F8E76", "#FFFFFF")]
     public void Accent_and_large_text_pairs_meet_wcag_aa_large_text(string text, string background)
     {
         Assert.True(ContrastRatio.Between(text, background) >= 3.0);

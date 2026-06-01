@@ -6,14 +6,14 @@
     xmlns:local="clr-namespace:FoodDrinkApp"
     Title="NutriBite"
     FlyoutBehavior="Disabled"
-    Shell.BackgroundColor="{AppThemeBinding Light=#FFF4E3, Dark=#120E0B}"
-    Shell.ForegroundColor="{AppThemeBinding Light=#3A2518, Dark=#FFF2DF}"
-    Shell.TitleColor="{AppThemeBinding Light=#3A2518, Dark=#FFF2DF}"
-    Shell.UnselectedColor="{AppThemeBinding Light=#9A7B63, Dark=#BFA58E}"
-    Shell.TabBarBackgroundColor="{AppThemeBinding Light=#FFF4E3, Dark=#120E0B}"
-    Shell.TabBarForegroundColor="{AppThemeBinding Light=#D9472B, Dark=#FFB15D}"
-    Shell.TabBarTitleColor="{AppThemeBinding Light=#D9472B, Dark=#FFB15D}"
-    Shell.TabBarUnselectedColor="{AppThemeBinding Light=#9A7B63, Dark=#BFA58E}">
+    Shell.BackgroundColor="{AppThemeBinding Light={StaticResource Surface1L}, Dark={StaticResource Surface1}}"
+    Shell.ForegroundColor="{AppThemeBinding Light={StaticResource TextPrimaryL}, Dark={StaticResource TextPrimary}}"
+    Shell.TitleColor="{AppThemeBinding Light={StaticResource TextPrimaryL}, Dark={StaticResource TextPrimary}}"
+    Shell.UnselectedColor="{AppThemeBinding Light={StaticResource TextSecondaryL}, Dark={StaticResource TextSecondary}}"
+    Shell.TabBarBackgroundColor="{AppThemeBinding Light={StaticResource Surface1L}, Dark={StaticResource Surface1}}"
+    Shell.TabBarForegroundColor="{StaticResource AccentB}"
+    Shell.TabBarTitleColor="{StaticResource AccentB}"
+    Shell.TabBarUnselectedColor="{AppThemeBinding Light={StaticResource TextSecondaryL}, Dark={StaticResource TextSecondary}}">
 
     <TabBar>
         <ShellContent

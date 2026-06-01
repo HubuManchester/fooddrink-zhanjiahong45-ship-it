@@ -5,54 +5,37 @@
              Title="Hardware Demo">
     <ScrollView>
         <ScrollView.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Color="{AppThemeBinding Light=#FFF1DA, Dark=#130F0C}" Offset="0.0" />
-                <GradientStop Color="{AppThemeBinding Light=#FFF9EF, Dark=#0F1711}" Offset="1.0" />
-            </LinearGradientBrush>
+            <StaticResource Key="PageBackgroundBrush" />
         </ScrollView.Background>
 
-        <VerticalStackLayout Padding="22" Spacing="16">
-            <Border StrokeThickness="0" Padding="18" BackgroundColor="{AppThemeBinding Light=#FFFDF8, Dark=#1A1712}">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="8" />
-                </Border.StrokeShape>
+        <VerticalStackLayout Padding="{OnIdiom Phone='20,18,20,24', Tablet='34,26,34,30', Desktop='42,28,42,34'}" Spacing="16">
+            <Border Style="{StaticResource HeroCard}">
                 <VerticalStackLayout Spacing="6">
                     <Label Text="Mobile hardware"
-                           FontSize="28"
-                           FontAttributes="Bold"
-                           TextColor="{AppThemeBinding Light=#3A2518, Dark=#FFF2DF}"
+                           Style="{StaticResource Display1}"
                            SemanticProperties.HeadingLevel="Level1" />
                     <Label Text="Demonstrate camera, location, speech, vibration, and haptic feedback."
-                           FontSize="15"
-                           TextColor="{AppThemeBinding Light=#8B6D55, Dark=#D8C4AC}" />
+                           Style="{StaticResource BodyText}" />
                 </VerticalStackLayout>
             </Border>
 
-            <Border StrokeThickness="1"
-                    Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
-                    BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
-                    Padding="16">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="8" />
-                </Border.StrokeShape>
+            <Border Style="{StaticResource GlassCard}">
                 <VerticalStackLayout Spacing="14">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                         <VerticalStackLayout Spacing="3">
-                            <Label Text="Food photo" FontSize="17" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}" />
-                            <Label Text="Capture the colour and condition of the meal." FontSize="13" TextColor="{AppThemeBinding Light=#8B6D55, Dark=#D8C4AC}" />
+                            <Label Text="Food Photo" Style="{StaticResource TitleText}" TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentA}}" />
+                            <Label Text="Capture the colour and condition of the meal." Style="{StaticResource CaptionText}" />
                         </VerticalStackLayout>
                         <Button Grid.Column="1"
                                 Text="Photo"
-                                BackgroundColor="#D9472B"
-                                TextColor="#FFFFFF"
                                 Clicked="OnTakePhotoClicked"
                                 SemanticProperties.Hint="Open the camera to capture a food image" />
                     </Grid>
                     <Border StrokeThickness="0"
-                            BackgroundColor="{AppThemeBinding Light=#FFF0C9, Dark=#312316}"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Surface2L}, Dark={StaticResource Surface2}}"
                             HeightRequest="220">
                         <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="8" />
+                            <RoundRectangle CornerRadius="18" />
                         </Border.StrokeShape>
                         <Image x:Name="FoodPhoto"
                                Aspect="AspectFill"
@@ -61,8 +44,7 @@
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                         <Label x:Name="PredictionLabel"
                                Text="Food recognition result will appear here."
-                               FontSize="13"
-                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}"
+                               Style="{StaticResource TelemetryText}"
                                VerticalOptions="Center"
                                SemanticProperties.Description="Latest food recognition result" />
                         <Button x:Name="ReadPredictionButton"
@@ -75,62 +57,46 @@
                 </VerticalStackLayout>
             </Border>
 
-            <Border StrokeThickness="1"
-                    Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
-                    BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
-                    Padding="16">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="8" />
-                </Border.StrokeShape>
+            <Border Style="{StaticResource GlassCard}">
                 <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                         <VerticalStackLayout Spacing="3">
-                            <Label Text="Meal location" FontSize="17" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#2F7A4F, Dark=#8CE6A1}" />
-                            <Label Text="Show country, city, region, and coordinates." FontSize="13" TextColor="{AppThemeBinding Light=#8B6D55, Dark=#D8C4AC}" />
+                            <Label Text="Meal Location" Style="{StaticResource TitleText}" TextColor="{AppThemeBinding Light={StaticResource AccentFreshL}, Dark={StaticResource AccentFresh}}" />
+                            <Label Text="Show country, city, region, and coordinates." Style="{StaticResource CaptionText}" />
                         </VerticalStackLayout>
                         <Button Grid.Column="1"
                                 Text="Locate"
-                                BackgroundColor="#2F7A4F"
-                                TextColor="#FFFFFF"
+                                Background="{StaticResource FreshBrush}"
+                                TextColor="{AppThemeBinding Light={StaticResource TextPrimaryL}, Dark={StaticResource BgBase}}"
                                 Clicked="OnGetLocationClicked"
                                 SemanticProperties.Hint="Use location to record the meal place" />
                     </Grid>
                     <Label x:Name="LocationLabel"
                            Grid.Row="1"
                            Text="Location has not been captured yet."
-                           FontSize="15"
-                           TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
+                           Style="{StaticResource BodyText}" />
                     <Label x:Name="CoordinateLabel"
                            Grid.Row="2"
                            Text="Coordinates will appear here."
-                           FontSize="13"
-                           TextColor="{AppThemeBinding Light=#9A7B63, Dark=#BFA58E}" />
+                           Style="{StaticResource TelemetryText}" />
                 </Grid>
             </Border>
 
-            <Border StrokeThickness="1"
-                    Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
-                    BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
-                    Padding="16">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="8" />
-                </Border.StrokeShape>
+            <Border Style="{StaticResource GlassCard}">
                 <VerticalStackLayout Spacing="14">
                     <VerticalStackLayout Spacing="3">
-                        <Label Text="Live sensors"
-                               FontSize="17"
-                               FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}"
+                        <Label Text="Live Sensors"
+                               Style="{StaticResource TitleText}"
+                               TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentA}}"
                                SemanticProperties.HeadingLevel="Level2" />
                         <Label Text="Start each sensor, then move the emulator sliders or the device."
-                               FontSize="13"
-                               TextColor="{AppThemeBinding Light=#8B6D55, Dark=#D8C4AC}" />
+                               Style="{StaticResource CaptionText}" />
                     </VerticalStackLayout>
 
                     <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="5" ColumnSpacing="12">
                         <Label Text="Accelerometer"
                                FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light=#3A2518, Dark=#FFF2DF}" />
+                               TextColor="{AppThemeBinding Light={StaticResource TextPrimaryL}, Dark={StaticResource TextPrimary}}" />
                         <Button x:Name="AccelerometerButton"
                                 Grid.Column="1"
                                 Text="Start"
@@ -141,17 +107,16 @@
                                Grid.Row="1"
                                Grid.ColumnSpan="2"
                                Text="Acceleration values will appear here."
-                               FontSize="13"
-                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}"
+                               Style="{StaticResource TelemetryText}"
                                SemanticProperties.Description="Live accelerometer reading" />
                     </Grid>
 
-                    <BoxView HeightRequest="1" Color="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}" />
+                    <BoxView HeightRequest="1" />
 
                     <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="5" ColumnSpacing="12">
                         <Label Text="Compass"
                                FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light=#3A2518, Dark=#FFF2DF}" />
+                               TextColor="{AppThemeBinding Light={StaticResource TextPrimaryL}, Dark={StaticResource TextPrimary}}" />
                         <Button x:Name="CompassButton"
                                 Grid.Column="1"
                                 Text="Start"
@@ -162,17 +127,16 @@
                                Grid.Row="1"
                                Grid.ColumnSpan="2"
                                Text="Compass heading will appear here."
-                               FontSize="13"
-                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}"
+                               Style="{StaticResource TelemetryText}"
                                SemanticProperties.Description="Live compass heading" />
                     </Grid>
 
-                    <BoxView HeightRequest="1" Color="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}" />
+                    <BoxView HeightRequest="1" />
 
                     <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="5" ColumnSpacing="12">
                         <Label Text="Gyroscope"
                                FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light=#3A2518, Dark=#FFF2DF}" />
+                               TextColor="{AppThemeBinding Light={StaticResource TextPrimaryL}, Dark={StaticResource TextPrimary}}" />
                         <Button x:Name="GyroscopeButton"
                                 Grid.Column="1"
                                 Text="Start"
@@ -183,37 +147,28 @@
                                Grid.Row="1"
                                Grid.ColumnSpan="2"
                                Text="Gyroscope values will appear here."
-                               FontSize="13"
-                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}"
+                               Style="{StaticResource TelemetryText}"
                                SemanticProperties.Description="Live gyroscope reading" />
                     </Grid>
                 </VerticalStackLayout>
             </Border>
 
-            <Border StrokeThickness="1"
-                    Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
-                    BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
-                    Padding="16">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="8" />
-                </Border.StrokeShape>
+            <Border Style="{StaticResource GlassCard}">
                 <VerticalStackLayout Spacing="14">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                         <VerticalStackLayout Spacing="3">
-                            <Label Text="Flashlight and shake"
-                                   FontSize="17"
-                                   FontAttributes="Bold"
-                                   TextColor="{AppThemeBinding Light=#2F7A4F, Dark=#8CE6A1}"
+                            <Label Text="Flashlight And Shake"
+                                   Style="{StaticResource TitleText}"
+                                   TextColor="{AppThemeBinding Light={StaticResource AccentFreshL}, Dark={StaticResource AccentFresh}}"
                                    SemanticProperties.HeadingLevel="Level2" />
                             <Label Text="Implemented in code (not the camera's built-in flash)."
-                                   FontSize="13"
-                                   TextColor="{AppThemeBinding Light=#8B6D55, Dark=#D8C4AC}" />
+                                   Style="{StaticResource CaptionText}" />
                         </VerticalStackLayout>
                         <Button x:Name="FlashlightButton"
                                 Grid.Column="1"
                                 Text="Flash"
-                                BackgroundColor="#2F7A4F"
-                                TextColor="#FFFFFF"
+                                Background="{StaticResource FreshBrush}"
+                                TextColor="{AppThemeBinding Light={StaticResource TextPrimaryL}, Dark={StaticResource BgBase}}"
                                 Clicked="OnToggleFlashlightClicked"
                                 SemanticProperties.Description="Turn the device flashlight on or off"
                                 SemanticProperties.Hint="Requires a real device with a flashlight" />
@@ -222,7 +177,7 @@
                     <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="5" ColumnSpacing="12">
                         <Label Text="Shake-to-suggest"
                                FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light=#3A2518, Dark=#FFF2DF}" />
+                               TextColor="{AppThemeBinding Light={StaticResource TextPrimaryL}, Dark={StaticResource TextPrimary}}" />
                         <Button x:Name="ShakeButton"
                                 Grid.Column="1"
                                 Text="Enable"
@@ -233,8 +188,7 @@
                                Grid.Row="1"
                                Grid.ColumnSpan="2"
                                Text="Enable shake suggestions, then shake the device."
-                               FontSize="13"
-                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}"
+                               Style="{StaticResource TelemetryText}"
                                SemanticProperties.Description="Latest shake meal suggestion" />
                     </Grid>
                 </VerticalStackLayout>
@@ -242,43 +196,41 @@
 
             <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                 <Button Text="Read help"
-                        BackgroundColor="#F29B38"
-                        TextColor="#3A2518"
                         Clicked="OnReadHelpClicked"
                         SemanticProperties.Hint="Read the help text aloud" />
                 <Button Grid.Column="1"
                         Text="Stop speech"
-                        BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
-                        BorderColor="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Surface1L}, Dark={StaticResource Surface2}}"
+                        BorderColor="{AppThemeBinding Light={StaticResource HairlineL}, Dark={StaticResource Hairline}}"
                         BorderWidth="1"
-                        TextColor="{AppThemeBinding Light=#D9472B, Dark=#FFB15D}"
+                        TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentB}}"
                         Clicked="OnStopSpeechClicked"
                         SemanticProperties.Hint="Stop current speech" />
             </Grid>
 
             <Button Text="Haptic feedback"
-                    BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
-                    BorderColor="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Surface1L}, Dark={StaticResource Surface2}}"
+                    BorderColor="{AppThemeBinding Light={StaticResource HairlineL}, Dark={StaticResource Hairline}}"
                     BorderWidth="1"
-                    TextColor="{AppThemeBinding Light=#D9472B, Dark=#FFB15D}"
+                    TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentB}}"
                     Clicked="OnFeedbackClicked"
                     SemanticProperties.Hint="Trigger vibration and haptic feedback" />
 
-            <Border StrokeThickness="0"
-                    BackgroundColor="{AppThemeBinding Light=#FFF0C9, Dark=#312316}"
+            <Border StrokeThickness="1"
+                    Stroke="{AppThemeBinding Light={StaticResource HairlineL}, Dark={StaticResource Hairline}}"
+                    BackgroundColor="{AppThemeBinding Light=#FFF2E7, Dark=#2C1A16}"
                     Padding="14">
                 <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="8" />
+                    <RoundRectangle CornerRadius="14" />
                 </Border.StrokeShape>
                 <VerticalStackLayout Spacing="6">
                     <Label x:Name="HardwareStatusLabel"
                            Text="Ready."
                            FontAttributes="Bold"
-                           TextColor="{AppThemeBinding Light=#A95517, Dark=#FFD18E}" />
+                           TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentB}}" />
                     <Label x:Name="FeedbackCountLabel"
                            Text="Haptic feedback tests: 0"
-                           FontSize="13"
-                           TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
+                           Style="{StaticResource TelemetryText}" />
                 </VerticalStackLayout>
             </Border>
         </VerticalStackLayout>

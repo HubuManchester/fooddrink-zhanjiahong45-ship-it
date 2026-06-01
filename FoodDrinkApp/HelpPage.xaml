@@ -5,26 +5,17 @@
              Title="Help">
     <ScrollView>
         <ScrollView.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Color="{AppThemeBinding Light=#FFF1DA, Dark=#130F0C}" Offset="0.0" />
-                <GradientStop Color="{AppThemeBinding Light=#FFF9EF, Dark=#0F1711}" Offset="1.0" />
-            </LinearGradientBrush>
+            <StaticResource Key="PageBackgroundBrush" />
         </ScrollView.Background>
 
-        <VerticalStackLayout Padding="{OnIdiom Phone='22', Tablet='34', Desktop='40'}" Spacing="16">
-            <Border StrokeThickness="0" Padding="18" BackgroundColor="{AppThemeBinding Light=#FFFDF8, Dark=#1A1712}">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="8" />
-                </Border.StrokeShape>
+        <VerticalStackLayout Padding="{OnIdiom Phone='20,18,20,24', Tablet='34,26,34,30', Desktop='42,28,42,34'}" Spacing="16">
+            <Border Style="{StaticResource HeroCard}">
                 <VerticalStackLayout Spacing="6">
                     <Label Text="Help and instructions"
-                           FontSize="28"
-                           FontAttributes="Bold"
-                           TextColor="{AppThemeBinding Light=#3A2518, Dark=#FFF2DF}"
+                           Style="{StaticResource Display1}"
                            SemanticProperties.HeadingLevel="Level1" />
                     <Label Text="Use this checklist during the assessment screencast."
-                           FontSize="15"
-                           TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
+                           Style="{StaticResource BodyText}" />
                 </VerticalStackLayout>
             </Border>
 
@@ -32,88 +23,61 @@
                   RowDefinitions="Auto,Auto"
                   ColumnSpacing="14"
                   RowSpacing="14">
-                <Border StrokeThickness="1"
-                        Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
-                        BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
-                        Padding="16">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="8" />
-                    </Border.StrokeShape>
+                <Border Style="{StaticResource GlassCard}">
                     <VerticalStackLayout Spacing="8">
                         <Label Text="Foods"
-                               FontSize="18"
-                               FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}"
+                               Style="{StaticResource TitleText}"
+                               TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentA}}"
                                SemanticProperties.HeadingLevel="Level2" />
                         <Label Text="Search by name, category, description, or tag. Use category and favorite filters to narrow the list."
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
+                               Style="{StaticResource BodyText}" />
                         <Label Text="Swipe a food card to add or remove it from favorites, then open Details for nutrition summaries."
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
+                               Style="{StaticResource BodyText}" />
                     </VerticalStackLayout>
                 </Border>
 
                 <Border Grid.Column="{OnIdiom Phone=0, Tablet=1, Desktop=1}"
                         Grid.Row="{OnIdiom Phone=1, Tablet=0, Desktop=0}"
-                        StrokeThickness="1"
-                        Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
-                        BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
-                        Padding="16">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="8" />
-                    </Border.StrokeShape>
+                        Style="{StaticResource GlassCard}">
                     <VerticalStackLayout Spacing="8">
                         <Label Text="Hardware"
-                               FontSize="18"
-                               FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light=#2F7A4F, Dark=#8CE6A1}"
+                               Style="{StaticResource TitleText}"
+                               TextColor="{AppThemeBinding Light={StaticResource AccentFreshL}, Dark={StaticResource AccentFresh}}"
                                SemanticProperties.HeadingLevel="Level2" />
                         <Label Text="Capture a food photo to run on-device MobileNet recognition, then read the result aloud."
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
+                               Style="{StaticResource BodyText}" />
                         <Label Text="Use emulator virtual sensors for accelerometer, compass, and gyroscope. Use a real device for flashlight and haptics."
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
+                               Style="{StaticResource BodyText}" />
                     </VerticalStackLayout>
                 </Border>
             </Grid>
 
-            <Border StrokeThickness="1"
-                    Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
-                    BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
-                    Padding="16">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="8" />
-                </Border.StrokeShape>
+            <Border Style="{StaticResource GlassCard}">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="Accessibility checks"
-                           FontSize="18"
-                           FontAttributes="Bold"
-                           TextColor="{AppThemeBinding Light=#A95517, Dark=#FFD18E}"
+                           Style="{StaticResource TitleText}"
+                           TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentB}}"
                            SemanticProperties.HeadingLevel="Level2" />
                     <Label Text="Settings includes light, dark, and system theme modes plus text scaling up to 200% for WCAG 1.4.4."
-                           FontSize="14"
-                           TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
+                           Style="{StaticResource BodyText}" />
                     <Label Text="Use a screen reader to confirm headings, hints, and status announcements are clear."
-                           FontSize="14"
-                           TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
+                           Style="{StaticResource BodyText}" />
                 </VerticalStackLayout>
             </Border>
 
             <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                 <Button Text="Read help"
-                        BackgroundColor="#2F7A4F"
-                        TextColor="#FFFFFF"
+                        Background="{StaticResource FreshBrush}"
+                        TextColor="{AppThemeBinding Light={StaticResource TextPrimaryL}, Dark={StaticResource BgBase}}"
                         Clicked="OnReadHelpClicked"
                         SemanticProperties.Description="Read help"
                         SemanticProperties.Hint="Read the main help instructions aloud" />
                 <Button Grid.Column="1"
                         Text="Test error"
-                        BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
-                        BorderColor="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Surface1L}, Dark={StaticResource Surface2}}"
+                        BorderColor="{AppThemeBinding Light={StaticResource HairlineL}, Dark={StaticResource Hairline}}"
                         BorderWidth="1"
-                        TextColor="{AppThemeBinding Light=#D9472B, Dark=#FFB15D}"
+                        TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentB}}"
                         Clicked="OnTestErrorClicked"
                         SemanticProperties.Description="Test friendly error"
                         SemanticProperties.Hint="Trigger a handled demo error without showing technical details" />
@@ -122,7 +86,7 @@
             <Label x:Name="HelpStatusLabel"
                    Text="Help ready."
                    FontAttributes="Bold"
-                   TextColor="{AppThemeBinding Light=#D9472B, Dark=#FFB15D}"
+                   TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentB}}"
                    SemanticProperties.Description="Help status" />
         </VerticalStackLayout>
     </ScrollView>

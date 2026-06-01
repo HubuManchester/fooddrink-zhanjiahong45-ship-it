@@ -6,17 +6,20 @@ namespace FoodDrinkApp;
 [QueryProperty(nameof(ItemId), "id")]
 public partial class FoodDetailPage : ContentPage
 {
+    private readonly MacroRingDrawable macroRingDrawable = new();
     private FoodItem? currentItem;
 
     public FoodDetailPage()
     {
         InitializeComponent();
+        MacroRingView.Drawable = macroRingDrawable;
     }
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
         AccessibilityService.ApplyFontScale(this);
+        _ = AnimateEntranceAsync();
     }
 
     protected override void OnDisappearing()
@@ -52,7 +55,42 @@ public partial class FoodDetailPage : ContentPage
         MacroLabel.Text = currentItem.MacroSummary;
         DescriptionLabel.Text = currentItem.Description;
         AllergyLabel.Text = currentItem.AllergyNote;
+        macroRingDrawable.SetMacros(currentItem.Protein, currentItem.Carbs, currentItem.Fat);
+        AnimateMacroRing();
         SemanticProperties.SetDescription(NameLabel, currentItem.AccessibleSummary);
+    }
+
+    private async Task AnimateEntranceAsync()
+    {
+        var views = new View[] { DetailHero, MacroCard, ActionPanel };
+
+        foreach (var view in views)
+        {
+            view.Opacity = 0;
+            view.TranslationY = 14;
+        }
+
+        foreach (var view in views)
+        {
+            _ = view.FadeTo(1, 260, Easing.CubicOut);
+            _ = view.TranslateTo(0, 0, 260, Easing.CubicOut);
+            await Task.Delay(70);
+        }
+    }
+
+    private void AnimateMacroRing()
+    {
+        macroRingDrawable.Progress = 0f;
+        MacroRingView.Invalidate();
+        this.AbortAnimation(nameof(MacroRingDrawable));
+
+        var animation = new Animation(value =>
+        {
+            macroRingDrawable.Progress = (float)value;
+            MacroRingView.Invalidate();
+        }, 0, 1, Easing.CubicOut);
+
+        animation.Commit(this, nameof(MacroRingDrawable), 16, 760);
     }
 
     private async void OnSpeakClicked(object? sender, EventArgs e)

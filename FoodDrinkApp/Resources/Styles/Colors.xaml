@@ -1,45 +1,89 @@
-﻿<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <?xaml-comp compile="true" ?>
-<ResourceDictionary 
+<ResourceDictionary
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
-    <!-- Note: For Android please see also Platforms\Android\Resources\values\colors.xml -->
+    <Color x:Key="BgBase">#0D0C0F</Color>
+    <Color x:Key="Surface1">#17151B</Color>
+    <Color x:Key="Surface2">#221F29</Color>
+    <Color x:Key="GlassFill">#12FFFFFF</Color>
+    <Color x:Key="Hairline">#2E2A36</Color>
+    <Color x:Key="TextPrimary">#F4EEE6</Color>
+    <Color x:Key="TextSecondary">#BFB7C7</Color>
+    <Color x:Key="TextMuted">#8B8398</Color>
+    <Color x:Key="AccentA">#FF6A3D</Color>
+    <Color x:Key="AccentB">#FFB23D</Color>
+    <Color x:Key="AccentFresh">#3DE0C0</Color>
+    <Color x:Key="WarningFill">#3A201D</Color>
+    <Color x:Key="WarningText">#FFB8A8</Color>
 
-    <Color x:Key="Primary">#512BD4</Color>
-    <Color x:Key="PrimaryDark">#ac99ea</Color>
-    <Color x:Key="PrimaryDarkText">#242424</Color>
-    <Color x:Key="Secondary">#DFD8F7</Color>
-    <Color x:Key="SecondaryDarkText">#9880e5</Color>
-    <Color x:Key="Tertiary">#2B0B98</Color>
+    <Color x:Key="BgBaseL">#FBF6EF</Color>
+    <Color x:Key="Surface1L">#FFFFFF</Color>
+    <Color x:Key="Surface2L">#F2E8DC</Color>
+    <Color x:Key="HairlineL">#E3D3C3</Color>
+    <Color x:Key="TextPrimaryL">#241F1A</Color>
+    <Color x:Key="TextSecondaryL">#5A5048</Color>
+    <Color x:Key="TextMutedL">#76695F</Color>
+    <Color x:Key="AccentTextL">#D24E22</Color>
+    <Color x:Key="AccentFreshL">#0F8E76</Color>
+    <Color x:Key="WarningFillL">#FFE8E0</Color>
+    <Color x:Key="WarningTextL">#B43820</Color>
 
-    <Color x:Key="White">White</Color>
-    <Color x:Key="Black">Black</Color>
-    <Color x:Key="Magenta">#D600AA</Color>
-    <Color x:Key="MidnightBlue">#190649</Color>
-    <Color x:Key="OffBlack">#1f1f1f</Color>
+    <Color x:Key="White">#FFFFFF</Color>
+    <Color x:Key="Black">#000000</Color>
+    <Color x:Key="OffBlack">#0D0C0F</Color>
+    <Color x:Key="Gray100">#F4EEE6</Color>
+    <Color x:Key="Gray200">#D8D0DE</Color>
+    <Color x:Key="Gray300">#BFB7C7</Color>
+    <Color x:Key="Gray400">#8B8398</Color>
+    <Color x:Key="Gray500">#6F687B</Color>
+    <Color x:Key="Gray600">#3A3544</Color>
+    <Color x:Key="Gray900">#17151B</Color>
+    <Color x:Key="Gray950">#0D0C0F</Color>
 
-    <Color x:Key="Gray100">#E1E1E1</Color>
-    <Color x:Key="Gray200">#C8C8C8</Color>
-    <Color x:Key="Gray300">#ACACAC</Color>
-    <Color x:Key="Gray400">#919191</Color>
-    <Color x:Key="Gray500">#6E6E6E</Color>
-    <Color x:Key="Gray600">#404040</Color>
-    <Color x:Key="Gray900">#212121</Color>
-    <Color x:Key="Gray950">#141414</Color>
+    <Color x:Key="Primary">#FF6A3D</Color>
+    <Color x:Key="PrimaryDark">#FFB23D</Color>
+    <Color x:Key="PrimaryDarkText">#241F1A</Color>
+    <Color x:Key="Secondary">#3DE0C0</Color>
+    <Color x:Key="SecondaryDarkText">#0F8E76</Color>
+    <Color x:Key="Tertiary">#FFB23D</Color>
+    <Color x:Key="Magenta">#FF6A3D</Color>
+    <Color x:Key="MidnightBlue">#17151B</Color>
 
-    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
-    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
-    <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}"/>
-    <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource White}"/>
-    <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource Black}"/>
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}" />
+    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}" />
+    <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}" />
+    <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource White}" />
+    <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource Black}" />
+    <SolidColorBrush x:Key="Gray100Brush" Color="{StaticResource Gray100}" />
+    <SolidColorBrush x:Key="Gray200Brush" Color="{StaticResource Gray200}" />
+    <SolidColorBrush x:Key="Gray300Brush" Color="{StaticResource Gray300}" />
+    <SolidColorBrush x:Key="Gray400Brush" Color="{StaticResource Gray400}" />
+    <SolidColorBrush x:Key="Gray500Brush" Color="{StaticResource Gray500}" />
+    <SolidColorBrush x:Key="Gray600Brush" Color="{StaticResource Gray600}" />
+    <SolidColorBrush x:Key="Gray900Brush" Color="{StaticResource Gray900}" />
+    <SolidColorBrush x:Key="Gray950Brush" Color="{StaticResource Gray950}" />
 
-    <SolidColorBrush x:Key="Gray100Brush" Color="{StaticResource Gray100}"/>
-    <SolidColorBrush x:Key="Gray200Brush" Color="{StaticResource Gray200}"/>
-    <SolidColorBrush x:Key="Gray300Brush" Color="{StaticResource Gray300}"/>
-    <SolidColorBrush x:Key="Gray400Brush" Color="{StaticResource Gray400}"/>
-    <SolidColorBrush x:Key="Gray500Brush" Color="{StaticResource Gray500}"/>
-    <SolidColorBrush x:Key="Gray600Brush" Color="{StaticResource Gray600}"/>
-    <SolidColorBrush x:Key="Gray900Brush" Color="{StaticResource Gray900}"/>
-    <SolidColorBrush x:Key="Gray950Brush" Color="{StaticResource Gray950}"/>
+    <LinearGradientBrush x:Key="PageBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="{AppThemeBinding Light={StaticResource BgBaseL}, Dark={StaticResource BgBase}}" Offset="0" />
+        <GradientStop Color="{AppThemeBinding Light=#F6ECE0, Dark=#141219}" Offset="0.52" />
+        <GradientStop Color="{AppThemeBinding Light=#EEF8F4, Dark=#081714}" Offset="1" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="HeroBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="{AppThemeBinding Light=#FFFFFF, Dark=#221F29}" Offset="0" />
+        <GradientStop Color="{AppThemeBinding Light=#FFF2E7, Dark=#321C19}" Offset="0.48" />
+        <GradientStop Color="{AppThemeBinding Light=#E7FFF8, Dark=#0F302A}" Offset="1" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="AccentBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="{StaticResource AccentA}" Offset="0" />
+        <GradientStop Color="{StaticResource AccentB}" Offset="1" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="FreshBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="{StaticResource AccentFresh}" Offset="0" />
+        <GradientStop Color="#78FFE2" Offset="1" />
+    </LinearGradientBrush>
 </ResourceDictionary>
