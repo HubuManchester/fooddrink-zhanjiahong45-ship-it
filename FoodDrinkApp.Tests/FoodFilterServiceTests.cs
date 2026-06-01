@@ -6,6 +6,14 @@ namespace FoodDrinkApp.Tests;
 public sealed class FoodFilterServiceTests
 {
     [Fact]
+    public void Apply_returns_all_items_when_no_filters_are_active()
+    {
+        var result = FoodFilterService.Apply(SampleItems(), null, new HashSet<string>(), favoritesOnly: false);
+
+        Assert.Equal(["1", "2", "3"], result.Select(item => item.Id));
+    }
+
+    [Fact]
     public void Apply_filters_by_category_case_insensitively()
     {
         var result = FoodFilterService.Apply(SampleItems(), "drink", new HashSet<string>(), favoritesOnly: false);
@@ -19,6 +27,14 @@ public sealed class FoodFilterServiceTests
         var result = FoodFilterService.Apply(SampleItems(), null, new HashSet<string> { "1", "3" }, favoritesOnly: true);
 
         Assert.Equal(["1", "3"], result.Select(item => item.Id));
+    }
+
+    [Fact]
+    public void Apply_ignores_favorite_ids_when_favorites_only_is_off()
+    {
+        var result = FoodFilterService.Apply(SampleItems(), null, new HashSet<string> { "2" }, favoritesOnly: false);
+
+        Assert.Equal(["1", "2", "3"], result.Select(item => item.Id));
     }
 
     [Fact]
