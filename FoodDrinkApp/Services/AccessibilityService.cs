@@ -7,12 +7,22 @@ namespace FoodDrinkApp.Services;
 /// </summary>
 public static class AccessibilityService
 {
+    private const string TextScalePreferenceKey = "text_scale_level";
     private static readonly ConditionalWeakTable<BindableObject, FontSizeStore> OriginalFontSizes = new();
+    private static int textScaleLevel;
 
     /// <summary>
     /// Gets or sets the selected text scale option from Settings.
     /// </summary>
-    public static int TextScaleLevel { get; set; }
+    public static int TextScaleLevel
+    {
+        get => textScaleLevel;
+        set
+        {
+            textScaleLevel = Math.Clamp(value, 0, 3);
+            Preferences.Set(TextScalePreferenceKey, textScaleLevel);
+        }
+    }
 
     /// <summary>
     /// Gets or sets whether any large-text option is active.
@@ -33,6 +43,14 @@ public static class AccessibilityService
         3 => 2.0,
         _ => 1.0
     };
+
+    /// <summary>
+    /// Loads the saved text scale so large-text mode survives app restarts.
+    /// </summary>
+    public static void LoadSavedTextScale()
+    {
+        textScaleLevel = Math.Clamp(Preferences.Get(TextScalePreferenceKey, 0), 0, 3);
+    }
 
     /// <summary>
     /// Applies the current text scale to labels, buttons, inputs, pickers, and search bars under the supplied root.

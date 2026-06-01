@@ -7,7 +7,7 @@ public partial class SettingsPage : ContentPage
     public SettingsPage()
     {
         InitializeComponent();
-        ThemePicker.SelectedIndex = 0;
+        ThemePicker.SelectedIndex = ThemePreferenceService.SavedIndex;
         TextScalePicker.SelectedIndex = AccessibilityService.TextScaleLevel;
     }
 
@@ -20,12 +20,7 @@ public partial class SettingsPage : ContentPage
 
     private void OnThemeChanged(object? sender, EventArgs e)
     {
-        Application.Current!.UserAppTheme = ThemePicker.SelectedIndex switch
-        {
-            1 => AppTheme.Light,
-            2 => AppTheme.Dark,
-            _ => AppTheme.Unspecified
-        };
+        ThemePreferenceService.SaveAndApplyFromIndex(ThemePicker.SelectedIndex);
 
         Announce("Theme preference updated.");
     }
