@@ -94,6 +94,138 @@
                 </Grid>
             </Border>
 
+            <Border StrokeThickness="1"
+                    Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
+                    BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
+                    Padding="16">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="14">
+                    <VerticalStackLayout Spacing="3">
+                        <Label Text="Live sensors"
+                               FontSize="17"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}"
+                               SemanticProperties.HeadingLevel="Level2" />
+                        <Label Text="Start each sensor, then move the emulator sliders or the device."
+                               FontSize="13"
+                               TextColor="{AppThemeBinding Light=#8B6D55, Dark=#D8C4AC}" />
+                    </VerticalStackLayout>
+
+                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="5" ColumnSpacing="12">
+                        <Label Text="Accelerometer"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#3A2518, Dark=#FFF2DF}" />
+                        <Button x:Name="AccelerometerButton"
+                                Grid.Column="1"
+                                Text="Start"
+                                Clicked="OnToggleAccelerometerClicked"
+                                SemanticProperties.Description="Start or stop accelerometer readings"
+                                SemanticProperties.Hint="Tilt the device to update the acceleration values" />
+                        <Label x:Name="AccelLabel"
+                               Grid.Row="1"
+                               Grid.ColumnSpan="2"
+                               Text="Acceleration values will appear here."
+                               FontSize="13"
+                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}"
+                               SemanticProperties.Description="Live accelerometer reading" />
+                    </Grid>
+
+                    <BoxView HeightRequest="1" Color="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}" />
+
+                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="5" ColumnSpacing="12">
+                        <Label Text="Compass"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#3A2518, Dark=#FFF2DF}" />
+                        <Button x:Name="CompassButton"
+                                Grid.Column="1"
+                                Text="Start"
+                                Clicked="OnToggleCompassClicked"
+                                SemanticProperties.Description="Start or stop compass readings"
+                                SemanticProperties.Hint="Rotate the device to update the heading" />
+                        <Label x:Name="CompassLabel"
+                               Grid.Row="1"
+                               Grid.ColumnSpan="2"
+                               Text="Compass heading will appear here."
+                               FontSize="13"
+                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}"
+                               SemanticProperties.Description="Live compass heading" />
+                    </Grid>
+
+                    <BoxView HeightRequest="1" Color="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}" />
+
+                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="5" ColumnSpacing="12">
+                        <Label Text="Gyroscope"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#3A2518, Dark=#FFF2DF}" />
+                        <Button x:Name="GyroscopeButton"
+                                Grid.Column="1"
+                                Text="Start"
+                                Clicked="OnToggleGyroscopeClicked"
+                                SemanticProperties.Description="Start or stop gyroscope readings"
+                                SemanticProperties.Hint="Rotate the device to update angular velocity values" />
+                        <Label x:Name="GyroLabel"
+                               Grid.Row="1"
+                               Grid.ColumnSpan="2"
+                               Text="Gyroscope values will appear here."
+                               FontSize="13"
+                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}"
+                               SemanticProperties.Description="Live gyroscope reading" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border StrokeThickness="1"
+                    Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
+                    BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
+                    Padding="16">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="14">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                        <VerticalStackLayout Spacing="3">
+                            <Label Text="Flashlight and shake"
+                                   FontSize="17"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light=#2F7A4F, Dark=#8CE6A1}"
+                                   SemanticProperties.HeadingLevel="Level2" />
+                            <Label Text="Implemented in code (not the camera's built-in flash)."
+                                   FontSize="13"
+                                   TextColor="{AppThemeBinding Light=#8B6D55, Dark=#D8C4AC}" />
+                        </VerticalStackLayout>
+                        <Button x:Name="FlashlightButton"
+                                Grid.Column="1"
+                                Text="Flash"
+                                BackgroundColor="#2F7A4F"
+                                TextColor="#FFFFFF"
+                                Clicked="OnToggleFlashlightClicked"
+                                SemanticProperties.Description="Turn the device flashlight on or off"
+                                SemanticProperties.Hint="Requires a real device with a flashlight" />
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="5" ColumnSpacing="12">
+                        <Label Text="Shake-to-suggest"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#3A2518, Dark=#FFF2DF}" />
+                        <Button x:Name="ShakeButton"
+                                Grid.Column="1"
+                                Text="Enable"
+                                Clicked="OnToggleShakeSuggestionClicked"
+                                SemanticProperties.Description="Enable or disable shake meal suggestions"
+                                SemanticProperties.Hint="Shake the device to choose a random meal suggestion" />
+                        <Label x:Name="ShakeSuggestionLabel"
+                               Grid.Row="1"
+                               Grid.ColumnSpan="2"
+                               Text="Enable shake suggestions, then shake the device."
+                               FontSize="13"
+                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}"
+                               SemanticProperties.Description="Latest shake meal suggestion" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
             <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                 <Button Text="Read help"
                         BackgroundColor="#F29B38"

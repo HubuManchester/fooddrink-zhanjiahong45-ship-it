@@ -1,10 +1,15 @@
 using FoodDrinkApp.Services;
+using Microsoft.Maui.Devices.Sensors;
 
 namespace FoodDrinkApp;
 
 public partial class HardwarePage : ContentPage
 {
     private int feedbackTestCount;
+    private bool accelerometerReadoutEnabled;
+    private bool shakeSuggestionEnabled;
+    private bool flashlightOn;
+    private readonly Random suggestionRandom = new();
 
     public HardwarePage()
     {
@@ -19,6 +24,8 @@ public partial class HardwarePage : ContentPage
 
     protected override void OnDisappearing()
     {
+        StopMotionSensors();
+        _ = TurnFlashlightOffAsync();
         SpeechService.Stop();
         base.OnDisappearing();
     }
@@ -158,7 +165,7 @@ public partial class HardwarePage : ContentPage
     {
         try
         {
-            const string helpText = "NutriBite records foods and drinks, shows nutrition details, and uses camera, location, speech, and haptic feedback to make meal tracking more practical.";
+            const string helpText = "NutriBite records foods and drinks, shows nutrition details, and uses camera, location, speech, haptic feedback, accelerometer, compass, gyroscope, flashlight, and shake suggestions to make meal tracking more practical.";
             await SpeechService.SpeakAsync(helpText);
             SetStatus("Reading help content aloud.");
         }
@@ -166,6 +173,301 @@ public partial class HardwarePage : ContentPage
         {
             SetStatus("Text to speech could not start on this device right now.");
         }
+    }
+
+    private void OnToggleAccelerometerClicked(object? sender, EventArgs e)
+    {
+        try
+        {
+            if (!Accelerometer.Default.IsSupported)
+            {
+                SetStatus("Accelerometer is not available on this device.");
+                return;
+            }
+
+            if (!accelerometerReadoutEnabled)
+            {
+                Accelerometer.Default.ReadingChanged += OnAccelerometerReadingChanged;
+                accelerometerReadoutEnabled = true;
+                EnsureAccelerometerRunning();
+                AccelerometerButton.Text = "Stop";
+                SetStatus("Accelerometer started. Tilt the device to see values change.");
+            }
+            else
+            {
+                Accelerometer.Default.ReadingChanged -= OnAccelerometerReadingChanged;
+                accelerometerReadoutEnabled = false;
+                AccelerometerButton.Text = "Start";
+                StopAccelerometerIfUnused();
+                SetStatus("Accelerometer stopped.");
+            }
+        }
+        catch (FeatureNotSupportedException)
+        {
+            SetStatus("Accelerometer is not supported on this device.");
+        }
+        catch
+        {
+            SetStatus("Accelerometer could not be started on this device.");
+        }
+    }
+
+    private void OnAccelerometerReadingChanged(object? sender, AccelerometerChangedEventArgs e)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            AccelLabel.Text = SensorFormatter.Vector3("Acceleration", e.Reading.Acceleration);
+        });
+    }
+
+    private void OnToggleCompassClicked(object? sender, EventArgs e)
+    {
+        try
+        {
+            if (!Compass.Default.IsSupported)
+            {
+                SetStatus("Compass is not available on this device.");
+                return;
+            }
+
+            if (!Compass.Default.IsMonitoring)
+            {
+                Compass.Default.ReadingChanged += OnCompassReadingChanged;
+                Compass.Default.Start(SensorSpeed.UI);
+                CompassButton.Text = "Stop";
+                SetStatus("Compass started. Rotate the device to see the heading change.");
+            }
+            else
+            {
+                Compass.Default.ReadingChanged -= OnCompassReadingChanged;
+                Compass.Default.Stop();
+                CompassButton.Text = "Start";
+                SetStatus("Compass stopped.");
+            }
+        }
+        catch (FeatureNotSupportedException)
+        {
+            SetStatus("Compass is not supported on this device.");
+        }
+        catch
+        {
+            SetStatus("Compass could not be started on this device.");
+        }
+    }
+
+    private void OnCompassReadingChanged(object? sender, CompassChangedEventArgs e)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            CompassLabel.Text = SensorFormatter.Heading(e.Reading.HeadingMagneticNorth);
+        });
+    }
+
+    private void OnToggleGyroscopeClicked(object? sender, EventArgs e)
+    {
+        try
+        {
+            if (!Gyroscope.Default.IsSupported)
+            {
+                SetStatus("Gyroscope is not available on this device.");
+                return;
+            }
+
+            if (!Gyroscope.Default.IsMonitoring)
+            {
+                Gyroscope.Default.ReadingChanged += OnGyroscopeReadingChanged;
+                Gyroscope.Default.Start(SensorSpeed.UI);
+                GyroscopeButton.Text = "Stop";
+                SetStatus("Gyroscope started. Rotate the device to see angular velocity.");
+            }
+            else
+            {
+                Gyroscope.Default.ReadingChanged -= OnGyroscopeReadingChanged;
+                Gyroscope.Default.Stop();
+                GyroscopeButton.Text = "Start";
+                SetStatus("Gyroscope stopped.");
+            }
+        }
+        catch (FeatureNotSupportedException)
+        {
+            SetStatus("Gyroscope is not supported on this device.");
+        }
+        catch
+        {
+            SetStatus("Gyroscope could not be started on this device.");
+        }
+    }
+
+    private void OnGyroscopeReadingChanged(object? sender, GyroscopeChangedEventArgs e)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            GyroLabel.Text = SensorFormatter.Vector3("Angular velocity", e.Reading.AngularVelocity);
+        });
+    }
+
+    private async void OnToggleFlashlightClicked(object? sender, EventArgs e)
+    {
+        try
+        {
+            if (!flashlightOn)
+            {
+                await Flashlight.Default.TurnOnAsync();
+                flashlightOn = true;
+                FlashlightButton.Text = "Off";
+                SetStatus("Flashlight turned on.");
+            }
+            else
+            {
+                await TurnFlashlightOffAsync();
+                SetStatus("Flashlight turned off.");
+            }
+        }
+        catch (FeatureNotSupportedException)
+        {
+            SetStatus("Flashlight is not supported on this device.");
+        }
+        catch (PermissionException)
+        {
+            SetStatus("Camera permission is required to use the flashlight.");
+        }
+        catch
+        {
+            SetStatus("Flashlight could not be changed on this device.");
+        }
+    }
+
+    private void OnToggleShakeSuggestionClicked(object? sender, EventArgs e)
+    {
+        try
+        {
+            if (!Accelerometer.Default.IsSupported)
+            {
+                SetStatus("Shake suggestions need an accelerometer, which is not available on this device.");
+                return;
+            }
+
+            if (!shakeSuggestionEnabled)
+            {
+                Accelerometer.Default.ShakeDetected += OnShakeDetected;
+                shakeSuggestionEnabled = true;
+                EnsureAccelerometerRunning();
+                ShakeButton.Text = "Disable";
+                SetStatus("Shake suggestions enabled. Shake the device to pick a meal.");
+            }
+            else
+            {
+                Accelerometer.Default.ShakeDetected -= OnShakeDetected;
+                shakeSuggestionEnabled = false;
+                ShakeButton.Text = "Enable";
+                StopAccelerometerIfUnused();
+                SetStatus("Shake suggestions disabled.");
+            }
+        }
+        catch (FeatureNotSupportedException)
+        {
+            SetStatus("Shake suggestions are not supported on this device.");
+        }
+        catch
+        {
+            SetStatus("Shake suggestions could not be enabled on this device.");
+        }
+    }
+
+    private async void OnShakeDetected(object? sender, EventArgs e)
+    {
+        try
+        {
+            var items = await FoodCatalogService.SearchAsync(null);
+            var suggestion = MealSuggestionService.PickRandom(items, suggestionRandom);
+            var text = $"Shake suggestion: {suggestion.Name} ({suggestion.CaloriesLabel})";
+
+            ShakeSuggestionLabel.Text = text;
+            SetStatus(text);
+            await SpeechService.SpeakAsync($"Try {suggestion.Name}.");
+        }
+        catch
+        {
+            SetStatus("A meal suggestion could not be selected right now.");
+        }
+    }
+
+    private void EnsureAccelerometerRunning()
+    {
+        if (!Accelerometer.Default.IsMonitoring)
+        {
+            Accelerometer.Default.Start(SensorSpeed.UI);
+        }
+    }
+
+    private void StopAccelerometerIfUnused()
+    {
+        if (!accelerometerReadoutEnabled && !shakeSuggestionEnabled && Accelerometer.Default.IsMonitoring)
+        {
+            Accelerometer.Default.Stop();
+        }
+    }
+
+    private async Task TurnFlashlightOffAsync()
+    {
+        if (!flashlightOn)
+        {
+            return;
+        }
+
+        try
+        {
+            await Flashlight.Default.TurnOffAsync();
+        }
+        catch
+        {
+        }
+
+        flashlightOn = false;
+        FlashlightButton.Text = "Flash";
+    }
+
+    private void StopMotionSensors()
+    {
+        try
+        {
+            if (accelerometerReadoutEnabled)
+            {
+                Accelerometer.Default.ReadingChanged -= OnAccelerometerReadingChanged;
+                accelerometerReadoutEnabled = false;
+            }
+
+            if (shakeSuggestionEnabled)
+            {
+                Accelerometer.Default.ShakeDetected -= OnShakeDetected;
+                shakeSuggestionEnabled = false;
+            }
+
+            if (Accelerometer.Default.IsSupported && Accelerometer.Default.IsMonitoring)
+            {
+                Accelerometer.Default.Stop();
+            }
+
+            if (Compass.Default.IsSupported && Compass.Default.IsMonitoring)
+            {
+                Compass.Default.ReadingChanged -= OnCompassReadingChanged;
+                Compass.Default.Stop();
+            }
+
+            if (Gyroscope.Default.IsSupported && Gyroscope.Default.IsMonitoring)
+            {
+                Gyroscope.Default.ReadingChanged -= OnGyroscopeReadingChanged;
+                Gyroscope.Default.Stop();
+            }
+        }
+        catch
+        {
+        }
+
+        AccelerometerButton.Text = "Start";
+        CompassButton.Text = "Start";
+        GyroscopeButton.Text = "Start";
+        ShakeButton.Text = "Enable";
     }
 
     private void OnStopSpeechClicked(object? sender, EventArgs e)
