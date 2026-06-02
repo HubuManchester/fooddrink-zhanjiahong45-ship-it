@@ -43,6 +43,12 @@ public sealed class FoodRepository
         Database.Table<FoodItem>().OrderBy(item => item.Name).ToListAsync();
 
     /// <summary>
+    /// Gets the number of locally stored records.
+    /// </summary>
+    public Task<int> CountAsync() =>
+        Database.Table<FoodItem>().CountAsync();
+
+    /// <summary>
     /// Searches locally stored records by name, category, description, or tags.
     /// </summary>
     public async Task<IReadOnlyList<FoodItem>> SearchAsync(string? query)
@@ -134,6 +140,7 @@ public sealed class FoodRepository
             }
 
             incoming.LocalId = existing.LocalId;
+            incoming.IsFavorite = existing.IsFavorite;
             await Database.UpdateAsync(incoming);
             changed++;
         }

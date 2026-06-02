@@ -134,10 +134,11 @@ public sealed class FoodRepositoryTests
         var repository = new FoodRepository();
         try
         {
-            await repository.InitAsync(dbPath, [SampleItem("meal-1", "Old Name", "Lunch", "protein")]);
+            var existingItem = SampleItem("meal-1", "Old Name", "Lunch", "protein");
+            existingItem.IsFavorite = true;
+            await repository.InitAsync(dbPath, [existingItem]);
 
             var updatedItem = SampleItem("meal-1", "Updated Name", "Dinner", "updated");
-            updatedItem.IsFavorite = true;
 
             await repository.ImportAsync([updatedItem]);
 
@@ -146,6 +147,47 @@ public sealed class FoodRepositoryTests
             Assert.Equal("Updated Name", allItems[0].Name);
             Assert.Equal("Dinner", allItems[0].Category);
             Assert.True(allItems[0].IsFavorite);
+        }
+        finally
+        {
+            await repository.CloseAsync();
+            DeleteTempDatabase(dbPath);
+        }
+    }
+
+    [Fact]
+    public async Task Import_merges_remote_catalogue_preserving_user_items_and_favorites()
+    {
+        var dbPath = CreateTempDatabasePath();
+        var repository = new FoodRepository();
+        try
+        {
+            await repository.InitAsync(dbPath, []);
+
+            var existingRemoteItem = SampleItem("remote-1", "Old Remote Item", "Lunch", "old");
+            existingRemoteItem.IsFavorite = true;
+            await repository.AddAsync(existingRemoteItem);
+            await repository.AddAsync(SampleItem("user-added-1", "User Smoothie", "Drink", "custom local"));
+
+            var updatedRemoteItem = SampleItem("remote-1", "Updated Remote Item", "Dinner", "updated remote");
+            updatedRemoteItem.IsFavorite = false;
+            var newRemoteItem = SampleItem("remote-2", "New Remote Item", "Snack", "new remote");
+            newRemoteItem.IsFavorite = true;
+
+            await repository.ImportAsync([updatedRemoteItem, newRemoteItem]);
+
+            var allItems = await repository.GetAllAsync();
+            Assert.Equal(3, allItems.Count);
+
+            var updated = Assert.Single(allItems, item => item.Id == "remote-1");
+            Assert.Equal("Updated Remote Item", updated.Name);
+            Assert.Equal("Dinner", updated.Category);
+            Assert.True(updated.IsFavorite);
+
+            Assert.Contains(allItems, item => item.Id == "user-added-1" && item.Name == "User Smoothie");
+
+            var inserted = Assert.Single(allItems, item => item.Id == "remote-2");
+            Assert.True(inserted.IsFavorite);
         }
         finally
         {

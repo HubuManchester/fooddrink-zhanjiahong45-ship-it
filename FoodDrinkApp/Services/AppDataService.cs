@@ -5,7 +5,7 @@ namespace FoodDrinkApp;
 /// <summary>
 /// Describes a catalogue import into the local SQLite repository.
 /// </summary>
-public sealed record CatalogImportResult(int SourceItemCount, int SyncedCount, bool UsedRemote);
+public sealed record CatalogImportResult(int SourceItemCount, int SyncedCount, bool UsedRemote, int LocalItemCount);
 
 /// <summary>
 /// Creates and shares the app's local SQLite food repository.
@@ -17,7 +17,12 @@ public static class AppDataService
     private static FoodRepository? repository;
 
     /// <summary>
-    /// Gets the initialized local repository, seeding it from the existing catalogue path on first run.
+    /// Gets the most recent catalogue import result.
+    /// </summary>
+    public static CatalogImportResult? LastCatalogImportResult { get; private set; }
+
+    /// <summary>
+    /// Gets the initialized local repository, syncing it from the remote catalogue on first run.
     /// </summary>
     public static async Task<FoodRepository> GetRepositoryAsync()
     {
@@ -35,9 +40,9 @@ public static class AppDataService
             }
 
             var dbPath = Path.Combine(FileSystem.AppDataDirectory, DatabaseFileName);
-            var seed = await FoodCatalogService.SearchAsync(null);
             var newRepository = new FoodRepository();
-            await newRepository.InitAsync(dbPath, seed);
+            await newRepository.InitAsync(dbPath, null);
+            LastCatalogImportResult = await SyncCatalogIntoRepositoryAsync(newRepository, seedLocalFallbackWhenEmpty: true);
             repository = newRepository;
             return repository;
         }
@@ -53,8 +58,25 @@ public static class AppDataService
     public static async Task<CatalogImportResult> ImportCatalogAsync()
     {
         var localRepository = await GetRepositoryAsync();
+        LastCatalogImportResult = await SyncCatalogIntoRepositoryAsync(localRepository, seedLocalFallbackWhenEmpty: false);
+        return LastCatalogImportResult;
+    }
+
+    private static async Task<CatalogImportResult> SyncCatalogIntoRepositoryAsync(
+        FoodRepository localRepository,
+        bool seedLocalFallbackWhenEmpty)
+    {
         var importItems = await FoodCatalogService.SearchAsync(null);
-        var syncedCount = await localRepository.ImportAsync(importItems);
-        return new CatalogImportResult(importItems.Count, syncedCount, FoodCatalogService.LastLoadUsedRemote);
+        var usedRemote = FoodCatalogService.LastLoadUsedRemote;
+        var localCount = await localRepository.CountAsync();
+        var syncedCount = 0;
+
+        if (usedRemote || (seedLocalFallbackWhenEmpty && localCount == 0))
+        {
+            syncedCount = await localRepository.ImportAsync(importItems);
+            localCount = await localRepository.CountAsync();
+        }
+
+        return new CatalogImportResult(importItems.Count, syncedCount, usedRemote, localCount);
     }
 }

@@ -7,6 +7,8 @@ public partial class MainPage : ContentPage
 {
     private const string AllCategories = "All categories";
     private IReadOnlyList<FoodItem> loadedItems = [];
+    private CatalogImportResult? lastCatalogImportResult;
+    private int lastVisibleItemCount;
     private CancellationTokenSource? searchDebounce;
     private int loadRequestVersion;
     private bool navigatingToDetail;
@@ -40,6 +42,7 @@ public partial class MainPage : ContentPage
             UpdateStatus("Loading foods...");
 
             var repository = await AppDataService.GetRepositoryAsync();
+            lastCatalogImportResult = AppDataService.LastCatalogImportResult;
             var items = await repository.SearchAsync(query);
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -149,22 +152,23 @@ public partial class MainPage : ContentPage
 
     private async void OnRefreshing(object? sender, EventArgs e)
     {
-        var importResult = new CatalogImportResult(0, 0, false);
+        var importResult = AppDataService.LastCatalogImportResult ?? new CatalogImportResult(0, 0, false, loadedItems.Count);
         try
         {
             importResult = await AppDataService.ImportCatalogAsync();
+            lastCatalogImportResult = importResult;
         }
         catch (Exception ex)
         {
             AppLog.Error("Import food catalog into local database", ex);
+            importResult = new CatalogImportResult(0, 0, false, loadedItems.Count);
+            lastCatalogImportResult = importResult;
         }
 
         await LoadFoodItemsAsync(SearchFoodBar.Text);
+        lastCatalogImportResult = importResult;
         FoodRefreshView.IsRefreshing = false;
-        UpdateStatus(importResult.UsedRemote
-            ? $"Loaded {importResult.SourceItemCount} items from the online catalogue; {importResult.SyncedCount} records synced to local SQLite."
-            : $"Online catalogue unavailable. Loaded {importResult.SourceItemCount} local fallback items; {importResult.SyncedCount} records synced to local SQLite.",
-            announce: true);
+        UpdateStatus(BuildFoodListStatus(includeOfflineFallback: !importResult.UsedRemote), announce: true);
     }
 
     private void UpdateCategoryOptions(IReadOnlyList<FoodItem> items)
@@ -198,8 +202,24 @@ public partial class MainPage : ContentPage
         var visibleItems = FoodFilterService.Apply(loadedItems, category, FavoritesOnlySwitch.IsToggled);
 
         FoodCollection.ItemsSource = visibleItems;
+        lastVisibleItemCount = visibleItems.Count;
 
-        UpdateStatus($"{visibleItems.Count} shown from {loadedItems.Count} foods. Source: local SQLite database.");
+        UpdateStatus(BuildFoodListStatus());
+    }
+
+    private string BuildFoodListStatus(bool includeOfflineFallback = false)
+    {
+        var source = lastCatalogImportResult?.UsedRemote == true
+            ? "online catalogue"
+            : "local SQLite database";
+        var message = $"{lastVisibleItemCount} shown from {loadedItems.Count} foods. Source: {source}.";
+
+        if (includeOfflineFallback)
+        {
+            message += " Online catalogue unavailable; showing saved local records.";
+        }
+
+        return message;
     }
 
     private void UpdateStatus(string message, bool announce = false)
