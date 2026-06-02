@@ -51,14 +51,14 @@ public partial class HardwarePage : ContentPage
                     await PickFoodPhotoAsync();
                     break;
                 default:
-                    SetStatus("No photo selected.");
+                    SetPhotoStatus("No photo selected.");
                     break;
             }
         }
         catch (Exception ex)
         {
             AppLog.Error("Open food photo action sheet", ex);
-            SetStatus("Photo options could not be opened right now.");
+            SetPhotoStatus("Photo options could not be opened right now.");
         }
     }
 
@@ -69,29 +69,30 @@ public partial class HardwarePage : ContentPage
             var permission = await Permissions.RequestAsync<Permissions.Camera>();
             if (permission != PermissionStatus.Granted)
             {
-                SetStatus("Camera permission is needed to take a photo. You can choose from the gallery instead.");
+                SetPhotoStatus("Camera permission is needed to take a photo. You can choose from the gallery instead.");
                 return;
             }
 
-            SetStatus("Opening camera...");
+            SetPhotoStatus("Opening camera...");
             await LoadAndClassifyPhotoAsync(
                 cameraVisionService.CapturePhotoAsync,
-                "Food photo captured. Running on-device recognition...");
+                "Food photo captured. Running on-device recognition...",
+                "No photo taken.");
         }
         catch (PermissionException ex)
         {
             AppLog.Error("Camera capture", ex);
-            SetStatus("Camera permission was denied. You can choose from the gallery instead.");
+            SetPhotoStatus("Camera permission was denied. You can choose from the gallery instead.");
         }
         catch (FeatureNotSupportedException ex)
         {
             AppLog.Error("Camera capture", ex);
-            SetStatus("Camera capture is not available here. Please choose a photo from the gallery instead.");
+            SetPhotoStatus("Camera capture is not available here. Please choose a photo from the gallery instead.");
         }
         catch (Exception ex)
         {
             AppLog.Error("Camera capture", ex);
-            SetStatus("Could not open the camera. Please choose a photo from the gallery instead.");
+            SetPhotoStatus("Could not open the camera. Please choose a photo from the gallery instead.");
         }
     }
 
@@ -99,29 +100,33 @@ public partial class HardwarePage : ContentPage
     {
         try
         {
-            SetStatus("Opening gallery...");
+            SetPhotoStatus("Opening gallery...");
             await LoadAndClassifyPhotoAsync(
                 cameraVisionService.PickPhotoAsync,
-                "Food photo selected. Running on-device recognition...");
+                "Food photo selected. Running on-device recognition...",
+                "No photo selected.");
         }
         catch (FeatureNotSupportedException ex)
         {
             AppLog.Error("Pick food photo from gallery", ex);
-            SetStatus("Photo gallery selection is not available on this device.");
+            SetPhotoStatus("Photo gallery selection is not available on this device.");
         }
         catch (Exception ex)
         {
             AppLog.Error("Pick food photo from gallery", ex);
-            SetStatus("Photo gallery selection could not be completed right now.");
+            SetPhotoStatus("Photo gallery selection could not be completed right now.");
         }
     }
 
-    private async Task LoadAndClassifyPhotoAsync(Func<Task<byte[]?>> loadPhotoAsync, string recognitionStatus)
+    private async Task LoadAndClassifyPhotoAsync(
+        Func<Task<byte[]?>> loadPhotoAsync,
+        string recognitionStatus,
+        string cancelledStatus)
     {
         var imageBytes = await loadPhotoAsync();
         if (imageBytes is null)
         {
-            SetStatus("No photo selected.");
+            SetPhotoStatus(cancelledStatus);
             return;
         }
 
@@ -143,32 +148,32 @@ public partial class HardwarePage : ContentPage
         catch (FileNotFoundException ex)
         {
             AppLog.Error("Load food recognition assets", ex);
-            SetStatus("Food recognition assets are missing from this app build.");
+            SetPhotoStatus("Food recognition assets are missing from this app build.");
         }
         catch (UnknownImageFormatException ex)
         {
             AppLog.Error("Decode selected food photo", ex);
-            SetStatus("The selected file is not a supported image.");
+            SetPhotoStatus("The selected file is not a supported image.");
         }
         catch (InvalidImageContentException ex)
         {
             AppLog.Error("Decode selected food photo", ex);
-            SetStatus("The selected image could not be decoded. Try a different JPEG or PNG.");
+            SetPhotoStatus("The selected image could not be decoded. Try a different JPEG or PNG.");
         }
         catch (OnnxRuntimeException ex)
         {
             AppLog.Error("Run food recognition inference", ex);
-            SetStatus("Food recognition inference could not run on this device right now.");
+            SetPhotoStatus("Food recognition inference could not run on this device right now.");
         }
         catch (InvalidOperationException ex)
         {
             AppLog.Error("Run food recognition", ex);
-            SetStatus("Food recognition could not start on this device right now.");
+            SetPhotoStatus("Food recognition could not start on this device right now.");
         }
         catch (Exception ex)
         {
             AppLog.Error("Classify food photo", ex);
-            SetStatus("Food recognition could not be completed right now.");
+            SetPhotoStatus("Food recognition could not be completed right now.");
         }
     }
 
@@ -504,5 +509,13 @@ public partial class HardwarePage : ContentPage
     {
         HardwareStatusLabel.Text = message;
         SemanticScreenReader.Announce(message);
+    }
+
+    private void SetPhotoStatus(string message)
+    {
+        latestPrediction = null;
+        PredictionLabel.Text = message;
+        ReadPredictionButton.IsEnabled = false;
+        SetStatus(message);
     }
 }
