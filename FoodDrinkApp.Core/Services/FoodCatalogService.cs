@@ -5,7 +5,7 @@ using FoodDrinkApp.Models;
 namespace FoodDrinkApp.Services;
 
 /// <summary>
-/// Loads, searches, and creates food records using MockAPI when configured and local fallback data otherwise.
+/// Loads, searches, and creates food records using a remote HTTPS catalogue with local fallback data.
 /// </summary>
 public static class FoodCatalogService
 {
@@ -23,6 +23,7 @@ public static class FoodCatalogService
     [
         new()
         {
+            Id = "1",
             Name = "Berry Yogurt Bowl",
             Category = "Breakfast",
             Description = "Greek yogurt with mixed berries, oats, and a small drizzle of honey.",
@@ -31,10 +32,12 @@ public static class FoodCatalogService
             Carbs = 42,
             Fat = 8,
             AllergyNote = "Contains dairy and gluten.",
-            Tags = "healthy breakfast yogurt berries"
+            Tags = "healthy breakfast yogurt berries",
+            IsFavorite = true
         },
         new()
         {
+            Id = "4",
             Name = "Chicken Brown Rice Box",
             Category = "Lunch",
             Description = "Grilled chicken breast with brown rice, spinach, cucumber, and lemon dressing.",
@@ -43,10 +46,12 @@ public static class FoodCatalogService
             Carbs = 58,
             Fat = 14,
             AllergyNote = "No common allergens recorded.",
-            Tags = "meal prep protein lunch"
+            Tags = "meal prep protein lunch",
+            IsFavorite = true
         },
         new()
         {
+            Id = "13",
             Name = "Iced Matcha Latte",
             Category = "Drink",
             Description = "Matcha, milk, and ice. A lower-sugar version is recommended.",
@@ -55,10 +60,12 @@ public static class FoodCatalogService
             Carbs = 22,
             Fat = 6,
             AllergyNote = "Contains dairy unless plant-based milk is selected.",
-            Tags = "drink caffeine matcha latte"
+            Tags = "drink caffeine matcha latte",
+            IsFavorite = true
         },
         new()
         {
+            Id = "8",
             Name = "Tomato Wholegrain Pasta",
             Category = "Dinner",
             Description = "Wholegrain pasta with tomato sauce, basil, and roasted vegetables.",
@@ -71,12 +78,28 @@ public static class FoodCatalogService
         }
     ];
 
-    private static List<FoodItem> cachedItems = new(LocalFallbackItems);
+    private static List<FoodItem> cachedItems = CreateLocalFallbackItems();
 
     /// <summary>
-    /// Gets whether the most recent catalogue load used the remote MockAPI endpoint.
+    /// Gets whether the most recent catalogue load used the configured remote endpoint.
     /// </summary>
-    public static bool LastLoadUsedMockApi { get; private set; }
+    public static bool LastLoadUsedRemote { get; private set; }
+
+    /// <summary>
+    /// Gets whether the most recent catalogue load used the remote endpoint.
+    /// </summary>
+    public static bool LastLoadUsedMockApi => LastLoadUsedRemote;
+
+    /// <summary>
+    /// Gets the number of source items returned by the most recent catalogue load.
+    /// </summary>
+    public static int LastLoadedCatalogCount { get; private set; } = cachedItems.Count;
+
+    /// <summary>
+    /// Deserializes the remote catalogue JSON shape into food records.
+    /// </summary>
+    public static IReadOnlyList<FoodItem> DeserializeCatalogJson(string json) =>
+        JsonSerializer.Deserialize<List<FoodItem>>(json, JsonOptions) ?? [];
 
     /// <summary>
     /// Searches the available catalogue by name, category, description, or tags.
@@ -102,11 +125,11 @@ public static class FoodCatalogService
     }
 
     /// <summary>
-    /// Gets a single food item from MockAPI when available, falling back to the local cache.
+    /// Gets a single food item from a REST endpoint when available, falling back to the loaded catalogue.
     /// </summary>
     public static async Task<FoodItem?> GetByIdAsync(string id)
     {
-        if (MockApiConfig.IsConfigured)
+        if (MockApiConfig.SupportsItemEndpoint)
         {
             try
             {
@@ -121,31 +144,32 @@ public static class FoodCatalogService
             }
             catch (HttpRequestException ex)
             {
-                AppLog.Error("Load food item from MockAPI", ex);
+                AppLog.Error("Load food item from remote endpoint", ex);
             }
             catch (TaskCanceledException ex)
             {
-                AppLog.Error("Load food item from MockAPI timed out", ex);
+                AppLog.Error("Load food item from remote endpoint timed out", ex);
             }
             catch (JsonException ex)
             {
-                AppLog.Error("Parse food item from MockAPI", ex);
+                AppLog.Error("Parse food item from remote endpoint", ex);
             }
             catch (Exception ex)
             {
-                AppLog.Error("Load food item from MockAPI", ex);
+                AppLog.Error("Load food item from remote endpoint", ex);
             }
         }
 
-        return cachedItems.FirstOrDefault(item => item.Id == id);
+        var items = await GetAllAsync();
+        return items.FirstOrDefault(item => item.Id == id);
     }
 
     /// <summary>
-    /// Adds a new food item to MockAPI when configured or to the local cache otherwise.
+    /// Adds a new food item to a writable REST endpoint when configured or to the local cache otherwise.
     /// </summary>
     public static async Task<FoodItem> AddAsync(FoodItem item)
     {
-        if (MockApiConfig.IsConfigured)
+        if (MockApiConfig.SupportsItemEndpoint)
         {
             var response = await HttpClient.PostAsJsonAsync(MockApiConfig.EndpointUrl, item, JsonOptions);
             response.EnsureSuccessStatusCode();
@@ -153,12 +177,12 @@ public static class FoodCatalogService
             var created = await response.Content.ReadFromJsonAsync<FoodItem>(JsonOptions);
             if (created is not null)
             {
-                cachedItems.Add(created);
+                UpsertCachedItem(created);
                 return created;
             }
         }
 
-        cachedItems.Add(item);
+        UpsertCachedItem(item);
         return item;
     }
 
@@ -166,39 +190,76 @@ public static class FoodCatalogService
     {
         if (!MockApiConfig.IsConfigured)
         {
-            LastLoadUsedMockApi = false;
-            return cachedItems;
+            return UseLocalFallback();
         }
 
         try
         {
-            var items = await HttpClient.GetFromJsonAsync<List<FoodItem>>(MockApiConfig.EndpointUrl, JsonOptions);
-            if (items is { Count: > 0 })
+            var json = await HttpClient.GetStringAsync(MockApiConfig.EndpointUrl);
+            var items = DeserializeCatalogJson(json);
+            if (items.Count > 0)
             {
-                cachedItems = items;
-                LastLoadUsedMockApi = true;
+                cachedItems = items.Select(CloneCatalogItem).ToList();
+                LastLoadUsedRemote = true;
+                LastLoadedCatalogCount = cachedItems.Count;
                 return cachedItems;
             }
+
+            AppLog.Error(
+                "Parse food catalog from remote endpoint",
+                new JsonException("The remote catalogue did not contain any food items."));
         }
         catch (HttpRequestException ex)
         {
-            AppLog.Error("Load food catalog from MockAPI", ex);
+            AppLog.Error("Load food catalog from remote endpoint", ex);
         }
         catch (TaskCanceledException ex)
         {
-            AppLog.Error("Load food catalog from MockAPI timed out", ex);
+            AppLog.Error("Load food catalog from remote endpoint timed out", ex);
         }
         catch (JsonException ex)
         {
-            AppLog.Error("Parse food catalog from MockAPI", ex);
+            AppLog.Error("Parse food catalog from remote endpoint", ex);
         }
         catch (Exception ex)
         {
-            AppLog.Error("Load food catalog from MockAPI", ex);
+            AppLog.Error("Load food catalog from remote endpoint", ex);
             // Keep the app usable during demos even if the network is unavailable.
         }
 
-        LastLoadUsedMockApi = false;
+        return UseLocalFallback();
+    }
+
+    private static IReadOnlyList<FoodItem> UseLocalFallback()
+    {
+        cachedItems = CreateLocalFallbackItems();
+        LastLoadUsedRemote = false;
+        LastLoadedCatalogCount = cachedItems.Count;
         return cachedItems;
     }
+
+    private static List<FoodItem> CreateLocalFallbackItems() =>
+        LocalFallbackItems.Select(CloneCatalogItem).ToList();
+
+    private static void UpsertCachedItem(FoodItem item)
+    {
+        cachedItems.RemoveAll(existing => existing.Id == item.Id);
+        cachedItems.Add(CloneCatalogItem(item));
+    }
+
+    private static FoodItem CloneCatalogItem(FoodItem item) =>
+        new()
+        {
+            Id = item.Id,
+            Name = item.Name,
+            Category = item.Category,
+            Description = item.Description,
+            Calories = item.Calories,
+            Protein = item.Protein,
+            Carbs = item.Carbs,
+            Fat = item.Fat,
+            AllergyNote = item.AllergyNote,
+            Tags = item.Tags,
+            IsFavorite = item.IsFavorite
+        };
 }

@@ -3,6 +3,11 @@ using FoodDrinkApp.Services;
 namespace FoodDrinkApp;
 
 /// <summary>
+/// Describes a catalogue import into the local SQLite repository.
+/// </summary>
+public sealed record CatalogImportResult(int SourceItemCount, int SyncedCount, bool UsedRemote);
+
+/// <summary>
 /// Creates and shares the app's local SQLite food repository.
 /// </summary>
 public static class AppDataService
@@ -45,10 +50,11 @@ public static class AppDataService
     /// <summary>
     /// Imports the current REST or local-fallback catalogue into the local SQLite database.
     /// </summary>
-    public static async Task<int> ImportCatalogAsync()
+    public static async Task<CatalogImportResult> ImportCatalogAsync()
     {
         var localRepository = await GetRepositoryAsync();
         var importItems = await FoodCatalogService.SearchAsync(null);
-        return await localRepository.ImportAsync(importItems);
+        var syncedCount = await localRepository.ImportAsync(importItems);
+        return new CatalogImportResult(importItems.Count, syncedCount, FoodCatalogService.LastLoadUsedRemote);
     }
 }

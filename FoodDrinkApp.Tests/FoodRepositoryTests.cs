@@ -15,19 +15,23 @@ public sealed class FoodRepositoryTests
             await repository.InitAsync(dbPath, []);
 
             var item = SampleItem("smoothie-1", "Berry Smoothie", "Drink", "berries breakfast");
+            item.IsFavorite = true;
             await repository.AddAsync(item);
 
             var created = await repository.GetByIdAsync("smoothie-1");
             Assert.NotNull(created);
             Assert.True(created!.LocalId > 0);
+            Assert.True(created.IsFavorite);
 
             created.Description = "Updated with oats and yogurt.";
             created.Calories = 310;
+            created.IsFavorite = false;
             await repository.UpdateAsync(created);
 
             var updated = await repository.GetByLocalIdAsync(created.LocalId);
             Assert.Equal("Updated with oats and yogurt.", updated!.Description);
             Assert.Equal(310, updated.Calories);
+            Assert.False(updated.IsFavorite);
 
             await repository.DeleteAsync(updated);
 
@@ -81,12 +85,16 @@ public sealed class FoodRepositoryTests
         {
             await repository.InitAsync(dbPath, [SampleItem("meal-1", "Old Name", "Lunch", "protein")]);
 
-            await repository.ImportAsync([SampleItem("meal-1", "Updated Name", "Dinner", "updated")]);
+            var updatedItem = SampleItem("meal-1", "Updated Name", "Dinner", "updated");
+            updatedItem.IsFavorite = true;
+
+            await repository.ImportAsync([updatedItem]);
 
             var allItems = await repository.GetAllAsync();
             Assert.Single(allItems);
             Assert.Equal("Updated Name", allItems[0].Name);
             Assert.Equal("Dinner", allItems[0].Category);
+            Assert.True(allItems[0].IsFavorite);
         }
         finally
         {

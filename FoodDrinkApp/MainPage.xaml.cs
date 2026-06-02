@@ -49,6 +49,7 @@ public partial class MainPage : ContentPage
             }
 
             loadedItems = items;
+            SyncFavoriteIds(loadedItems);
             UpdateCategoryOptions(loadedItems);
             ApplyFilters();
         }
@@ -151,7 +152,7 @@ public partial class MainPage : ContentPage
         ApplyFilters();
     }
 
-    private void OnFavoriteInvoked(object? sender, EventArgs e)
+    private async void OnFavoriteInvoked(object? sender, EventArgs e)
     {
         if (sender is not SwipeItem swipeItem || swipeItem.CommandParameter is not string id)
         {
@@ -160,25 +161,42 @@ public partial class MainPage : ContentPage
 
         var item = loadedItems.FirstOrDefault(food => food.Id == id);
         var itemName = item?.Name ?? "Item";
-        var isFavorite = favoriteItemIds.Add(id);
+        var isFavorite = item is not null && !item.IsFavorite;
 
-        if (!isFavorite)
+        if (item is not null)
         {
-            favoriteItemIds.Remove(id);
+            item.IsFavorite = isFavorite;
         }
 
+        _ = isFavorite ? favoriteItemIds.Add(id) : favoriteItemIds.Remove(id);
+
         ApplyFilters();
-        UpdateStatus(isFavorite
-            ? $"{itemName} added to favorites."
-            : $"{itemName} removed from favorites.", announce: true);
+
+        try
+        {
+            if (item is not null)
+            {
+                var repository = await AppDataService.GetRepositoryAsync();
+                await repository.UpdateAsync(item);
+            }
+
+            UpdateStatus(isFavorite
+                ? $"{itemName} added to favorites."
+                : $"{itemName} removed from favorites.", announce: true);
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("Update favourite state", ex);
+            UpdateStatus("The favourite state could not be saved right now.", announce: true);
+        }
     }
 
     private async void OnRefreshing(object? sender, EventArgs e)
     {
-        var imported = 0;
+        var importResult = new CatalogImportResult(0, 0, false);
         try
         {
-            imported = await AppDataService.ImportCatalogAsync();
+            importResult = await AppDataService.ImportCatalogAsync();
         }
         catch (Exception ex)
         {
@@ -187,8 +205,10 @@ public partial class MainPage : ContentPage
 
         await LoadFoodItemsAsync(SearchFoodBar.Text);
         FoodRefreshView.IsRefreshing = false;
-        var source = FoodCatalogService.LastLoadUsedMockApi ? "mockapi.io" : "local fallback data";
-        UpdateStatus($"Food and drink list refreshed from {source}; {imported} records synced to local database.", announce: true);
+        UpdateStatus(importResult.UsedRemote
+            ? $"Loaded {importResult.SourceItemCount} items from the online catalogue; {importResult.SyncedCount} records synced to local SQLite."
+            : $"Online catalogue unavailable. Loaded {importResult.SourceItemCount} local fallback items; {importResult.SyncedCount} records synced to local SQLite.",
+            announce: true);
     }
 
     private void UpdateCategoryOptions(IReadOnlyList<FoodItem> items)
@@ -224,6 +244,15 @@ public partial class MainPage : ContentPage
         FoodCollection.ItemsSource = visibleItems;
 
         UpdateStatus($"{visibleItems.Count} shown from {loadedItems.Count} foods. Source: local SQLite database.");
+    }
+
+    private void SyncFavoriteIds(IEnumerable<FoodItem> items)
+    {
+        favoriteItemIds.Clear();
+        foreach (var item in items.Where(item => item.IsFavorite))
+        {
+            favoriteItemIds.Add(item.Id);
+        }
     }
 
     private void UpdateStatus(string message, bool announce = false)

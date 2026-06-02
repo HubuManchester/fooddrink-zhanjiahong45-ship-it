@@ -178,6 +178,7 @@ public sealed class FoodRepository
             Carbs = item.Carbs,
             Fat = item.Fat,
             AllergyNote = item.AllergyNote,
-            Tags = item.Tags
+            Tags = item.Tags,
+            IsFavorite = item.IsFavorite
         };
 }

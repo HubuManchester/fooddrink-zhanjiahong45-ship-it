@@ -77,6 +77,12 @@ public sealed class FoodItem
     public string Tags { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets whether the record should appear in the favourites filter.
+    /// </summary>
+    [JsonPropertyName("isFavorite")]
+    public bool IsFavorite { get; set; }
+
+    /// <summary>
     /// Gets calories formatted for compact UI labels.
     /// </summary>
     [JsonIgnore]

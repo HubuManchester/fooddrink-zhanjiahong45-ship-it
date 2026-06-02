@@ -5,13 +5,13 @@ namespace FoodDrinkApp.Tests;
 public sealed class FoodCatalogServiceTests
 {
     [Fact]
-    public async Task Empty_query_returns_local_items_sorted_by_name()
+    public async Task Empty_query_returns_catalog_items_sorted_by_name()
     {
         var items = await FoodCatalogService.SearchAsync("");
 
-        Assert.Equal(
-            ["Berry Yogurt Bowl", "Chicken Brown Rice Box", "Iced Matcha Latte", "Tomato Wholegrain Pasta"],
-            items.Select(item => item.Name));
+        Assert.NotEmpty(items);
+        Assert.Equal(items.OrderBy(item => item.Name).Select(item => item.Name), items.Select(item => item.Name));
+        Assert.Contains(items, item => item.Name == "Berry Yogurt Bowl");
     }
 
     [Theory]
@@ -38,12 +38,13 @@ public sealed class FoodCatalogServiceTests
     }
 
     [Fact]
-    public async Task Empty_endpoint_uses_local_fallback()
+    public async Task Configured_endpoint_loads_catalog_or_fallback()
     {
         var items = await FoodCatalogService.SearchAsync(null);
 
-        Assert.False(FoodCatalogService.LastLoadUsedMockApi);
+        Assert.True(MockApiConfig.IsConfigured);
         Assert.NotEmpty(items);
+        Assert.True(FoodCatalogService.LastLoadedCatalogCount > 0);
     }
 
     [Fact]
@@ -52,5 +53,41 @@ public sealed class FoodCatalogServiceTests
         var items = await FoodCatalogService.SearchAsync("not-in-the-catalog");
 
         Assert.Empty(items);
+    }
+
+    [Fact]
+    public void Food_catalog_json_deserializes_remote_shape()
+    {
+        const string json = """
+            [
+              {
+                "id": "sample-1",
+                "name": "Berry Yogurt Bowl",
+                "category": "Breakfast",
+                "description": "Greek yogurt with berries.",
+                "calories": 340,
+                "protein": 24,
+                "carbs": 42,
+                "fat": 8,
+                "tags": "high-protein, vegetarian",
+                "allergyNote": "Contains dairy",
+                "isFavorite": true
+              }
+            ]
+            """;
+
+        var items = FoodCatalogService.DeserializeCatalogJson(json);
+
+        var item = Assert.Single(items);
+        Assert.Equal("sample-1", item.Id);
+        Assert.Equal("Berry Yogurt Bowl", item.Name);
+        Assert.Equal("Breakfast", item.Category);
+        Assert.Equal(340, item.Calories);
+        Assert.Equal(24, item.Protein);
+        Assert.Equal(42, item.Carbs);
+        Assert.Equal(8, item.Fat);
+        Assert.Equal("Contains dairy", item.AllergyNote);
+        Assert.Equal("high-protein, vegetarian", item.Tags);
+        Assert.True(item.IsFavorite);
     }
 }
