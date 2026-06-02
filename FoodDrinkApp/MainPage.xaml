@@ -154,63 +154,49 @@
                 </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:FoodItem">
-                        <SwipeView>
-                            <SwipeView.RightItems>
-                                <SwipeItems Mode="Execute">
-                                    <SwipeItem Text="Favorite"
-                                               BackgroundColor="{StaticResource AccentFreshL}"
-                                               Invoked="OnFavoriteInvoked"
-                                               CommandParameter="{Binding Id}"
-                                               SemanticProperties.Description="Toggle favorite"
-                                               SemanticProperties.Hint="Add or remove this record from favorites" />
-                                    <SwipeItem Text="Delete"
-                                               BackgroundColor="{StaticResource WarningTextL}"
-                                               Invoked="OnDeleteInvoked"
-                                               CommandParameter="{Binding Id}"
-                                               SemanticProperties.Description="Delete record"
-                                               SemanticProperties.Hint="Delete this food or drink record" />
-                                </SwipeItems>
-                            </SwipeView.RightItems>
-                            <Border Style="{StaticResource FoodListCard}">
-                                <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="7" ColumnSpacing="10">
-                                    <Label Text="{Binding Name}"
-                                           Style="{StaticResource TitleText}"
-                                           SemanticProperties.HeadingLevel="Level2" />
-                                    <Label Grid.Column="1"
-                                           Text="{Binding CaloriesLabel}"
-                                           FontFamily="Mono"
+                        <Border Style="{StaticResource FoodListCard}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnFoodCardTapped"
+                                                      CommandParameter="{Binding Id}" />
+                            </Border.GestureRecognizers>
+                            <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="7" ColumnSpacing="10">
+                                <Label Text="{Binding Name}"
+                                       Style="{StaticResource TitleText}"
+                                       SemanticProperties.HeadingLevel="Level2" />
+                                <Label Grid.Column="1"
+                                       Text="{Binding CaloriesLabel}"
+                                       FontFamily="Mono"
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       HorizontalTextAlignment="End"
+                                       TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentB}}" />
+                                <Label Grid.Row="1"
+                                       Grid.ColumnSpan="2"
+                                       Text="{Binding Description}"
+                                       Style="{StaticResource CaptionText}"
+                                       LineBreakMode="TailTruncation" />
+                                <Label Grid.Row="2"
+                                       Grid.ColumnSpan="2"
+                                       Text="{Binding MacroSummary}"
+                                       FontFamily="Mono"
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light={StaticResource AccentFreshL}, Dark={StaticResource AccentFresh}}" />
+                                <Grid Grid.Row="3" Grid.ColumnSpan="2" ColumnDefinitions="*,Auto" Margin="0,4,0,0">
+                                    <Label Text="{Binding Category}"
                                            FontSize="13"
                                            FontAttributes="Bold"
-                                           HorizontalTextAlignment="End"
-                                           TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentB}}" />
-                                    <Label Grid.Row="1"
-                                           Grid.ColumnSpan="2"
-                                           Text="{Binding Description}"
-                                           Style="{StaticResource CaptionText}"
-                                           LineBreakMode="TailTruncation" />
-                                    <Label Grid.Row="2"
-                                           Grid.ColumnSpan="2"
-                                           Text="{Binding MacroSummary}"
-                                           FontFamily="Mono"
-                                           FontSize="13"
-                                           FontAttributes="Bold"
-                                           TextColor="{AppThemeBinding Light={StaticResource AccentFreshL}, Dark={StaticResource AccentFresh}}" />
-                                    <Grid Grid.Row="3" Grid.ColumnSpan="2" ColumnDefinitions="*,Auto" Margin="0,4,0,0">
-                                        <Label Text="{Binding Category}"
-                                               FontSize="13"
-                                               FontAttributes="Bold"
-                                               TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentA}}" />
-                                        <Button Grid.Column="1"
-                                                Text="Details"
-                                                Padding="14,8"
-                                                CommandParameter="{Binding Id}"
-                                                Clicked="OnDetailsClicked"
-                                                SemanticProperties.Description="Open details"
-                                                SemanticProperties.Hint="Open nutrition details" />
-                                    </Grid>
+                                           TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentA}}" />
+                                    <Button Grid.Column="1"
+                                            Text="Details"
+                                            Padding="14,8"
+                                            CommandParameter="{Binding Id}"
+                                            Clicked="OnDetailsClicked"
+                                            SemanticProperties.Description="Open details"
+                                            SemanticProperties.Hint="Open nutrition details" />
                                 </Grid>
-                            </Border>
-                        </SwipeView>
+                            </Grid>
+                        </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>

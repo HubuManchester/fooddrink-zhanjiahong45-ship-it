@@ -57,9 +57,14 @@ public partial class FoodDetailPage : ContentPage
         {
             NameLabel.Text = "Record not found";
             DescriptionLabel.Text = "The selected food or drink could not be loaded.";
+            FavoriteButton.IsEnabled = false;
+            DeleteButton.IsEnabled = false;
+            SetDetailStatus("Record not found.", announce: false);
             return;
         }
 
+        FavoriteButton.IsEnabled = true;
+        DeleteButton.IsEnabled = true;
         NameLabel.Text = currentItem.Name;
         CategoryLabel.Text = currentItem.Category;
         CaloriesLabel.Text = currentItem.CaloriesLabel;
@@ -70,11 +75,13 @@ public partial class FoodDetailPage : ContentPage
         AnimateMacroRing();
         SemanticProperties.SetDescription(NameLabel, currentItem.AccessibleSummary);
         SemanticProperties.SetDescription(MacroRingView, $"Macro ratio ring for {currentItem.MacroSummary}.");
+        UpdateFavoriteButton();
+        SetDetailStatus("Ready.", announce: false);
     }
 
     private async Task AnimateEntranceAsync()
     {
-        var views = new View[] { DetailHero, MacroCard, ActionPanel };
+        var views = new View[] { DetailHero, MacroCard, ActionPanel, RecordActionsPanel };
 
         foreach (var view in views)
         {
@@ -141,6 +148,71 @@ public partial class FoodDetailPage : ContentPage
         await Shell.Current.GoToAsync($"{nameof(AddItemPage)}?id={Uri.EscapeDataString(currentItem.Id)}");
     }
 
+    private async void OnFavoriteClicked(object? sender, EventArgs e)
+    {
+        if (currentItem is null)
+        {
+            await DisplayAlert("Missing record", "There is no record to favourite.", "OK");
+            return;
+        }
+
+        var newFavoriteState = !currentItem.IsFavorite;
+        currentItem.IsFavorite = newFavoriteState;
+        SetRecordActionsEnabled(false);
+        UpdateFavoriteButton();
+
+        try
+        {
+            var repository = await AppDataService.GetRepositoryAsync();
+            await repository.UpdateAsync(currentItem);
+            SetDetailStatus(newFavoriteState
+                ? $"{currentItem.Name} added to favourites."
+                : $"{currentItem.Name} removed from favourites.");
+        }
+        catch (Exception ex)
+        {
+            currentItem.IsFavorite = !newFavoriteState;
+            AppLog.Error("Update favourite state from detail page", ex);
+            SetDetailStatus("The favourite state could not be saved right now.");
+            UpdateFavoriteButton();
+        }
+        finally
+        {
+            SetRecordActionsEnabled(true);
+        }
+    }
+
+    private async void OnDeleteClicked(object? sender, EventArgs e)
+    {
+        if (currentItem is null)
+        {
+            await DisplayAlert("Missing record", "There is no record to delete.", "OK");
+            return;
+        }
+
+        var itemName = currentItem.Name;
+        var confirmed = await DisplayAlert("Delete record", $"Delete {itemName}?", "Delete", "Cancel");
+        if (!confirmed)
+        {
+            return;
+        }
+
+        SetRecordActionsEnabled(false);
+        try
+        {
+            var repository = await AppDataService.GetRepositoryAsync();
+            await repository.DeleteAsync(currentItem);
+            SetDetailStatus($"{itemName} deleted.");
+            await Shell.Current.GoToAsync("..");
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("Delete food record from detail page", ex);
+            SetDetailStatus("The record could not be deleted right now.");
+            SetRecordActionsEnabled(true);
+        }
+    }
+
     private async void OnVibrateClicked(object? sender, EventArgs e)
     {
         try
@@ -153,6 +225,45 @@ public partial class FoodDetailPage : ContentPage
         {
             AppLog.Error("Trigger nutrition reminder vibration", ex);
             await DisplayAlert("Vibration unavailable", "This device could not trigger vibration feedback right now.", "OK");
+        }
+    }
+
+    private void UpdateFavoriteButton()
+    {
+        if (currentItem is null)
+        {
+            FavoriteButton.Text = "Add to favourites";
+            SemanticProperties.SetDescription(FavoriteButton, "Add to favourites");
+            SemanticProperties.SetHint(FavoriteButton, "Load a record before changing favourite state");
+            return;
+        }
+
+        if (currentItem.IsFavorite)
+        {
+            FavoriteButton.Text = "Favourited";
+            SemanticProperties.SetDescription(FavoriteButton, $"{currentItem.Name} is favourited");
+            SemanticProperties.SetHint(FavoriteButton, "Remove this food or drink record from favourites");
+            return;
+        }
+
+        FavoriteButton.Text = "Add to favourites";
+        SemanticProperties.SetDescription(FavoriteButton, $"{currentItem.Name} is not favourited");
+        SemanticProperties.SetHint(FavoriteButton, "Add this food or drink record to favourites");
+    }
+
+    private void SetRecordActionsEnabled(bool isEnabled)
+    {
+        FavoriteButton.IsEnabled = isEnabled && currentItem is not null;
+        DeleteButton.IsEnabled = isEnabled && currentItem is not null;
+    }
+
+    private void SetDetailStatus(string message, bool announce = true)
+    {
+        DetailStatusLabel.Text = message;
+
+        if (announce)
+        {
+            SemanticScreenReader.Announce(message);
         }
     }
 }

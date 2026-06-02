@@ -13,11 +13,9 @@ public static class FoodFilterService
     public static IReadOnlyList<FoodItem> Apply(
         IReadOnlyList<FoodItem> items,
         string? category,
-        IReadOnlySet<string> favoriteIds,
         bool favoritesOnly)
     {
         ArgumentNullException.ThrowIfNull(items);
-        ArgumentNullException.ThrowIfNull(favoriteIds);
 
         IEnumerable<FoodItem> filtered = items;
 
@@ -28,7 +26,7 @@ public static class FoodFilterService
 
         if (favoritesOnly)
         {
-            filtered = filtered.Where(item => favoriteIds.Contains(item.Id));
+            filtered = filtered.Where(item => item.IsFavorite);
         }
 
         return filtered.ToArray();

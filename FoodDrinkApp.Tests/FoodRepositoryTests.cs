@@ -77,6 +77,57 @@ public sealed class FoodRepositoryTests
     }
 
     [Fact]
+    public async Task UpdateAsync_persists_favorite_toggle_when_reloaded()
+    {
+        var dbPath = CreateTempDatabasePath();
+        var repository = new FoodRepository();
+        try
+        {
+            await repository.InitAsync(dbPath, []);
+
+            await repository.AddAsync(SampleItem("toast-1", "Avocado Toast", "Breakfast", "toast brunch"));
+
+            var item = await repository.GetByIdAsync("toast-1");
+            Assert.NotNull(item);
+            Assert.False(item!.IsFavorite);
+
+            item.IsFavorite = true;
+            await repository.UpdateAsync(item);
+
+            var reloaded = await repository.GetByIdAsync("toast-1");
+            Assert.True(reloaded!.IsFavorite);
+        }
+        finally
+        {
+            await repository.CloseAsync();
+            DeleteTempDatabase(dbPath);
+        }
+    }
+
+    [Fact]
+    public async Task DeleteByIdAsync_removes_record()
+    {
+        var dbPath = CreateTempDatabasePath();
+        var repository = new FoodRepository();
+        try
+        {
+            await repository.InitAsync(dbPath, []);
+            await repository.AddAsync(SampleItem("salad-1", "Lentil Salad", "Lunch", "lentils greens"));
+
+            var deleted = await repository.DeleteByIdAsync("salad-1");
+
+            Assert.True(deleted);
+            Assert.Null(await repository.GetByIdAsync("salad-1"));
+            Assert.False(await repository.DeleteByIdAsync("salad-1"));
+        }
+        finally
+        {
+            await repository.CloseAsync();
+            DeleteTempDatabase(dbPath);
+        }
+    }
+
+    [Fact]
     public async Task Import_updates_existing_public_ids_without_duplicates()
     {
         var dbPath = CreateTempDatabasePath();

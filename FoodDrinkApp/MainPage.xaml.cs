@@ -6,10 +6,10 @@ namespace FoodDrinkApp;
 public partial class MainPage : ContentPage
 {
     private const string AllCategories = "All categories";
-    private readonly HashSet<string> favoriteItemIds = new(StringComparer.Ordinal);
     private IReadOnlyList<FoodItem> loadedItems = [];
     private CancellationTokenSource? searchDebounce;
     private int loadRequestVersion;
+    private bool navigatingToDetail;
     private bool updatingCategoryPicker;
 
     public MainPage()
@@ -49,7 +49,6 @@ public partial class MainPage : ContentPage
             }
 
             loadedItems = items;
-            SyncFavoriteIds(loadedItems);
             UpdateCategoryOptions(loadedItems);
             ApplyFilters();
         }
@@ -82,7 +81,33 @@ public partial class MainPage : ContentPage
     {
         if (sender is Button button && button.CommandParameter is string id)
         {
+            await OpenFoodDetailsAsync(id);
+        }
+    }
+
+    private async void OnFoodCardTapped(object? sender, TappedEventArgs e)
+    {
+        if (e.Parameter is string id)
+        {
+            await OpenFoodDetailsAsync(id);
+        }
+    }
+
+    private async Task OpenFoodDetailsAsync(string id)
+    {
+        if (navigatingToDetail)
+        {
+            return;
+        }
+
+        navigatingToDetail = true;
+        try
+        {
             await Shell.Current.GoToAsync($"{nameof(FoodDetailPage)}?id={Uri.EscapeDataString(id)}");
+        }
+        finally
+        {
+            navigatingToDetail = false;
         }
     }
 
@@ -109,36 +134,6 @@ public partial class MainPage : ContentPage
         await LoadFoodItemsAsync(SearchFoodBar.Text);
     }
 
-    private async void OnDeleteInvoked(object? sender, EventArgs e)
-    {
-        if (sender is not SwipeItem swipeItem || swipeItem.CommandParameter is not string id)
-        {
-            return;
-        }
-
-        var item = loadedItems.FirstOrDefault(food => food.Id == id);
-        var itemName = item?.Name ?? "this record";
-        var confirmed = await DisplayAlert("Delete record", $"Delete {itemName}?", "Delete", "Cancel");
-        if (!confirmed)
-        {
-            return;
-        }
-
-        try
-        {
-            var repository = await AppDataService.GetRepositoryAsync();
-            var deleted = await repository.DeleteByIdAsync(id);
-            favoriteItemIds.Remove(id);
-            await LoadFoodItemsAsync(SearchFoodBar.Text);
-            UpdateStatus(deleted ? $"{itemName} deleted." : $"{itemName} was already removed.", announce: true);
-        }
-        catch (Exception ex)
-        {
-            AppLog.Error("Delete local food record", ex);
-            UpdateStatus("The record could not be deleted right now.", announce: true);
-        }
-    }
-
     private void OnCategoryChanged(object? sender, EventArgs e)
     {
         if (!updatingCategoryPicker)
@@ -150,45 +145,6 @@ public partial class MainPage : ContentPage
     private void OnFavoritesOnlyToggled(object? sender, ToggledEventArgs e)
     {
         ApplyFilters();
-    }
-
-    private async void OnFavoriteInvoked(object? sender, EventArgs e)
-    {
-        if (sender is not SwipeItem swipeItem || swipeItem.CommandParameter is not string id)
-        {
-            return;
-        }
-
-        var item = loadedItems.FirstOrDefault(food => food.Id == id);
-        var itemName = item?.Name ?? "Item";
-        var isFavorite = item is not null && !item.IsFavorite;
-
-        if (item is not null)
-        {
-            item.IsFavorite = isFavorite;
-        }
-
-        _ = isFavorite ? favoriteItemIds.Add(id) : favoriteItemIds.Remove(id);
-
-        ApplyFilters();
-
-        try
-        {
-            if (item is not null)
-            {
-                var repository = await AppDataService.GetRepositoryAsync();
-                await repository.UpdateAsync(item);
-            }
-
-            UpdateStatus(isFavorite
-                ? $"{itemName} added to favorites."
-                : $"{itemName} removed from favorites.", announce: true);
-        }
-        catch (Exception ex)
-        {
-            AppLog.Error("Update favourite state", ex);
-            UpdateStatus("The favourite state could not be saved right now.", announce: true);
-        }
     }
 
     private async void OnRefreshing(object? sender, EventArgs e)
@@ -239,20 +195,11 @@ public partial class MainPage : ContentPage
     {
         var selectedCategory = CategoryPicker.SelectedItem as string;
         var category = selectedCategory == AllCategories ? null : selectedCategory;
-        var visibleItems = FoodFilterService.Apply(loadedItems, category, favoriteItemIds, FavoritesOnlySwitch.IsToggled);
+        var visibleItems = FoodFilterService.Apply(loadedItems, category, FavoritesOnlySwitch.IsToggled);
 
         FoodCollection.ItemsSource = visibleItems;
 
         UpdateStatus($"{visibleItems.Count} shown from {loadedItems.Count} foods. Source: local SQLite database.");
-    }
-
-    private void SyncFavoriteIds(IEnumerable<FoodItem> items)
-    {
-        favoriteItemIds.Clear();
-        foreach (var item in items.Where(item => item.IsFavorite))
-        {
-            favoriteItemIds.Add(item.Id);
-        }
     }
 
     private void UpdateStatus(string message, bool announce = false)

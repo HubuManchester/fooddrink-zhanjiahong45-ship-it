@@ -109,6 +109,38 @@
                         SemanticProperties.Hint="Edit this food or drink record" />
             </Grid>
 
+            <Grid x:Name="RecordActionsPanel"
+                  ColumnDefinitions="{OnIdiom Phone='*', Tablet='*,*', Desktop='*,*'}"
+                  RowDefinitions="{OnIdiom Phone='Auto,Auto', Tablet='Auto', Desktop='Auto'}"
+                  ColumnSpacing="12"
+                  RowSpacing="10">
+                <Button x:Name="FavoriteButton"
+                        Text="Add to favourites"
+                        Background="{StaticResource FreshBrush}"
+                        TextColor="{AppThemeBinding Light={StaticResource TextPrimaryL}, Dark={StaticResource BgBase}}"
+                        Clicked="OnFavoriteClicked"
+                        SemanticProperties.Description="Add to favourites"
+                        SemanticProperties.Hint="Mark this food or drink record as a favourite" />
+                <Button x:Name="DeleteButton"
+                        Grid.Row="{OnIdiom Phone=1, Tablet=0, Desktop=0}"
+                        Grid.Column="{OnIdiom Phone=0, Tablet=1, Desktop=1}"
+                        Text="Delete"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Surface1L}, Dark={StaticResource Surface2}}"
+                        BorderColor="{AppThemeBinding Light={StaticResource WarningTextL}, Dark={StaticResource WarningText}}"
+                        BorderWidth="1"
+                        TextColor="{AppThemeBinding Light={StaticResource WarningTextL}, Dark={StaticResource WarningText}}"
+                        Clicked="OnDeleteClicked"
+                        SemanticProperties.Description="Delete record"
+                        SemanticProperties.Hint="Delete this food or drink record from local SQLite storage" />
+            </Grid>
+
+            <Label x:Name="DetailStatusLabel"
+                   Text="Ready."
+                   FontAttributes="Bold"
+                   FontFamily="Mono"
+                   TextColor="{AppThemeBinding Light={StaticResource TextSecondaryL}, Dark={StaticResource TextSecondary}}"
+                   SemanticProperties.Description="Detail page status" />
+
             <Button Text="Vibration reminder"
                     Background="{StaticResource FreshBrush}"
                     TextColor="{AppThemeBinding Light={StaticResource TextPrimaryL}, Dark={StaticResource BgBase}}"
