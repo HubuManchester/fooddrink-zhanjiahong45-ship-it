@@ -42,7 +42,7 @@ public static class AppDataService
             var dbPath = Path.Combine(FileSystem.AppDataDirectory, DatabaseFileName);
             var newRepository = new FoodRepository();
             await newRepository.InitAsync(dbPath, null);
-            LastCatalogImportResult = await SyncCatalogIntoRepositoryAsync(newRepository, seedLocalFallbackWhenEmpty: true);
+            LastCatalogImportResult = await SyncCatalogIntoRepositoryAsync(newRepository);
             repository = newRepository;
             return repository;
         }
@@ -58,20 +58,18 @@ public static class AppDataService
     public static async Task<CatalogImportResult> ImportCatalogAsync()
     {
         var localRepository = await GetRepositoryAsync();
-        LastCatalogImportResult = await SyncCatalogIntoRepositoryAsync(localRepository, seedLocalFallbackWhenEmpty: false);
+        LastCatalogImportResult = await SyncCatalogIntoRepositoryAsync(localRepository);
         return LastCatalogImportResult;
     }
 
-    private static async Task<CatalogImportResult> SyncCatalogIntoRepositoryAsync(
-        FoodRepository localRepository,
-        bool seedLocalFallbackWhenEmpty)
+    private static async Task<CatalogImportResult> SyncCatalogIntoRepositoryAsync(FoodRepository localRepository)
     {
         var importItems = await FoodCatalogService.SearchAsync(null);
         var usedRemote = FoodCatalogService.LastLoadUsedRemote;
         var localCount = await localRepository.CountAsync();
         var syncedCount = 0;
 
-        if (usedRemote || (seedLocalFallbackWhenEmpty && localCount == 0))
+        if (importItems.Count > 0)
         {
             syncedCount = await localRepository.ImportAsync(importItems);
             localCount = await localRepository.CountAsync();

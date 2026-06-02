@@ -9,7 +9,7 @@ public sealed class FoodCatalogServiceTests
     {
         var items = await FoodCatalogService.SearchAsync("");
 
-        Assert.NotEmpty(items);
+        Assert.True(items.Count >= 14);
         Assert.Equal(items.OrderBy(item => item.Name).Select(item => item.Name), items.Select(item => item.Name));
         Assert.Contains(items, item => item.Name == "Berry Yogurt Bowl");
     }
@@ -44,7 +44,7 @@ public sealed class FoodCatalogServiceTests
 
         Assert.True(MockApiConfig.IsConfigured);
         Assert.NotEmpty(items);
-        Assert.True(FoodCatalogService.LastLoadedCatalogCount > 0);
+        Assert.True(FoodCatalogService.LastLoadedCatalogCount >= 14);
     }
 
     [Fact]

@@ -13,6 +13,16 @@ public static class MockApiConfig
     public const string EndpointUrl = "https://raw.githubusercontent.com/HubuManchester/fooddrink-zhanjiahong45-ship-it/main/data/foods.json";
 
     /// <summary>
+    /// Gets additional read-only mirrors for the same public catalogue.
+    /// </summary>
+    public static readonly IReadOnlyList<string> ReadOnlyMirrorUrls =
+    [
+        "https://cdn.jsdelivr.net/gh/HubuManchester/fooddrink-zhanjiahong45-ship-it@main/data/foods.json",
+        "https://gh-proxy.com/https://raw.githubusercontent.com/HubuManchester/fooddrink-zhanjiahong45-ship-it/main/data/foods.json",
+        "https://ghproxy.net/https://raw.githubusercontent.com/HubuManchester/fooddrink-zhanjiahong45-ship-it/main/data/foods.json"
+    ];
+
+    /// <summary>
     /// Gets whether a remote endpoint is available for catalogue operations.
     /// </summary>
     public static bool IsConfigured => !string.IsNullOrWhiteSpace(EndpointUrl);

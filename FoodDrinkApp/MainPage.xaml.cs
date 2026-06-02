@@ -204,7 +204,7 @@ public partial class MainPage : ContentPage
         FoodCollection.ItemsSource = visibleItems;
         lastVisibleItemCount = visibleItems.Count;
 
-        UpdateStatus(BuildFoodListStatus());
+        UpdateStatus(BuildFoodListStatus(includeOfflineFallback: lastCatalogImportResult is { UsedRemote: false }));
     }
 
     private string BuildFoodListStatus(bool includeOfflineFallback = false)
