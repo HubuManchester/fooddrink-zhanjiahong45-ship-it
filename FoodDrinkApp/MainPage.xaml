@@ -154,10 +154,15 @@
                 </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:FoodItem">
-                        <Border Style="{StaticResource FoodListCard}">
+                        <Border Style="{StaticResource FoodListCard}"
+                                SemanticProperties.Hint="Tap to open nutrition details. Press and hold for favourite and delete quick actions.">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnFoodCardTapped"
                                                       CommandParameter="{Binding Id}" />
+                                <PointerGestureRecognizer PointerPressed="OnFoodCardPointerPressed"
+                                                          PointerPressedCommandParameter="{Binding Id}"
+                                                          PointerReleased="OnFoodCardPointerReleased"
+                                                          PointerExited="OnFoodCardPointerReleased" />
                             </Border.GestureRecognizers>
                             <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="7" ColumnSpacing="10">
                                 <Label Text="{Binding Name}"

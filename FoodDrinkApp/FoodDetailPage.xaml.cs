@@ -4,11 +4,14 @@ using FoodDrinkApp.Services;
 namespace FoodDrinkApp;
 
 [QueryProperty(nameof(ItemId), "id")]
+[QueryProperty(nameof(OrderedIds), "ids")]
 public partial class FoodDetailPage : ContentPage
 {
     private readonly MacroRingDrawable macroRingDrawable = new();
+    private IReadOnlyList<string> orderedItemIds = [];
     private FoodItem? currentItem;
     private string? currentItemId;
+    private bool isSwipeNavigating;
 
     public FoodDetailPage()
     {
@@ -43,8 +46,14 @@ public partial class FoodDetailPage : ContentPage
         }
     }
 
+    public string OrderedIds
+    {
+        set => orderedItemIds = ParseOrderedIds(value);
+    }
+
     private async Task LoadItemAsync(string id)
     {
+        currentItemId = id;
         var repository = await AppDataService.GetRepositoryAsync();
         currentItem = await repository.GetByIdAsync(id);
         BindingContext = currentItem;
@@ -156,22 +165,18 @@ public partial class FoodDetailPage : ContentPage
             return;
         }
 
-        var newFavoriteState = !currentItem.IsFavorite;
-        currentItem.IsFavorite = newFavoriteState;
         SetRecordActionsEnabled(false);
-        UpdateFavoriteButton();
 
         try
         {
-            var repository = await AppDataService.GetRepositoryAsync();
-            await repository.UpdateAsync(currentItem);
+            var newFavoriteState = await FoodRecordActionService.ToggleFavoriteAsync(currentItem);
+            UpdateFavoriteButton();
             SetDetailStatus(newFavoriteState
                 ? $"{currentItem.Name} added to favourites."
                 : $"{currentItem.Name} removed from favourites.");
         }
         catch (Exception ex)
         {
-            currentItem.IsFavorite = !newFavoriteState;
             AppLog.Error("Update favourite state from detail page", ex);
             SetDetailStatus("The favourite state could not be saved right now.");
             UpdateFavoriteButton();
@@ -200,8 +205,7 @@ public partial class FoodDetailPage : ContentPage
         SetRecordActionsEnabled(false);
         try
         {
-            var repository = await AppDataService.GetRepositoryAsync();
-            await repository.DeleteAsync(currentItem);
+            await FoodRecordActionService.DeleteAsync(currentItem);
             SetDetailStatus($"{itemName} deleted.");
             await Shell.Current.GoToAsync("..");
         }
@@ -211,6 +215,79 @@ public partial class FoodDetailPage : ContentPage
             SetDetailStatus("The record could not be deleted right now.");
             SetRecordActionsEnabled(true);
         }
+    }
+
+    private async void OnDetailSwiped(object? sender, SwipedEventArgs e)
+    {
+        switch (e.Direction)
+        {
+            case SwipeDirection.Left:
+                await NavigateAdjacentItemAsync(1);
+                break;
+            case SwipeDirection.Right:
+                await NavigateAdjacentItemAsync(-1);
+                break;
+        }
+    }
+
+    private async Task NavigateAdjacentItemAsync(int offset)
+    {
+        if (isSwipeNavigating)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(currentItemId))
+        {
+            SetDetailStatus("Load a record before swiping between items.");
+            return;
+        }
+
+        isSwipeNavigating = true;
+        SetRecordActionsEnabled(false);
+
+        try
+        {
+            var navigationIds = await GetNavigationIdsAsync();
+            var adjacentId = FoodNavigationService.GetAdjacentId(navigationIds, currentItemId, offset);
+            if (adjacentId is null)
+            {
+                SetDetailStatus("No other food records to show.");
+                return;
+            }
+
+            await LoadItemAsync(adjacentId);
+            if (currentItem is not null)
+            {
+                SetDetailStatus(offset > 0
+                    ? $"Showing next item: {currentItem.Name}."
+                    : $"Showing previous item: {currentItem.Name}.");
+            }
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("Navigate food detail by swipe", ex);
+            SetDetailStatus("The next food record could not be loaded right now.");
+        }
+        finally
+        {
+            SetRecordActionsEnabled(true);
+            isSwipeNavigating = false;
+        }
+    }
+
+    private async Task<IReadOnlyList<string>> GetNavigationIdsAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(currentItemId) &&
+            orderedItemIds.Count > 1 &&
+            orderedItemIds.Contains(currentItemId, StringComparer.Ordinal))
+        {
+            return orderedItemIds;
+        }
+
+        var repository = await AppDataService.GetRepositoryAsync();
+        var items = await repository.GetAllAsync();
+        return items.Select(item => item.Id).Where(id => !string.IsNullOrWhiteSpace(id)).ToArray();
     }
 
     private async void OnVibrateClicked(object? sender, EventArgs e)
@@ -265,5 +342,19 @@ public partial class FoodDetailPage : ContentPage
         {
             SemanticScreenReader.Announce(message);
         }
+    }
+
+    private static IReadOnlyList<string> ParseOrderedIds(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return [];
+        }
+
+        return value
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(Uri.UnescapeDataString)
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .ToArray();
     }
 }
