@@ -18,11 +18,6 @@ public sealed class CameraVisionService
     private FoodVisionService? foodVisionService;
 
     /// <summary>
-    /// Gets whether the current device supports still-photo capture.
-    /// </summary>
-    public bool IsCaptureSupported => MediaPicker.Default.IsCaptureSupported;
-
-    /// <summary>
     /// Captures a photo and returns its bytes, or null when the user cancels capture.
     /// </summary>
     public async Task<byte[]?> CapturePhotoAsync()

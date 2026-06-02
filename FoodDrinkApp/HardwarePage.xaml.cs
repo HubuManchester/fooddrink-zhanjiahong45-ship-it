@@ -64,18 +64,12 @@ public partial class HardwarePage : ContentPage
 
     private async Task CaptureFoodPhotoAsync()
     {
-        if (!cameraVisionService.IsCaptureSupported)
-        {
-            SetStatus("This device does not support camera capture. Choose from gallery instead.");
-            return;
-        }
-
         try
         {
             var permission = await Permissions.RequestAsync<Permissions.Camera>();
             if (permission != PermissionStatus.Granted)
             {
-                SetStatus("Camera permission was denied. Choose from gallery or enable camera access in device settings.");
+                SetStatus("Camera permission is needed to take a photo. You can choose from the gallery instead.");
                 return;
             }
 
@@ -86,18 +80,18 @@ public partial class HardwarePage : ContentPage
         }
         catch (PermissionException ex)
         {
-            AppLog.Error("Request camera permission", ex);
-            SetStatus("Camera permission was denied. Choose from gallery or enable camera access in device settings.");
+            AppLog.Error("Camera capture", ex);
+            SetStatus("Camera permission was denied. You can choose from the gallery instead.");
         }
         catch (FeatureNotSupportedException ex)
         {
-            AppLog.Error("Capture food photo", ex);
-            SetStatus("This device does not support camera capture. Choose from gallery instead.");
+            AppLog.Error("Camera capture", ex);
+            SetStatus("Camera capture is not available here. Please choose a photo from the gallery instead.");
         }
         catch (Exception ex)
         {
-            AppLog.Error("Capture food photo", ex);
-            SetStatus("Camera capture could not be completed right now. Choose from gallery instead.");
+            AppLog.Error("Camera capture", ex);
+            SetStatus("Could not open the camera. Please choose a photo from the gallery instead.");
         }
     }
 
