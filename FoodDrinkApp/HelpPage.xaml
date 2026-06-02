@@ -8,13 +8,15 @@
             <StaticResource Key="PageBackgroundBrush" />
         </ScrollView.Background>
 
-        <VerticalStackLayout Padding="{OnIdiom Phone='20,18,20,24', Tablet='34,26,34,30', Desktop='42,28,42,34'}" Spacing="16">
+        <VerticalStackLayout x:Name="HelpContentLayout"
+                             Padding="{OnIdiom Phone='20,18,20,24', Tablet='34,26,34,30', Desktop='42,28,42,34'}"
+                             Spacing="16">
             <Border Style="{StaticResource HeroCard}">
                 <VerticalStackLayout Spacing="6">
                     <Label Text="Help and instructions"
                            Style="{StaticResource Display1}"
                            SemanticProperties.HeadingLevel="Level1" />
-                    <Label Text="Use this checklist during the assessment screencast."
+                    <Label Text="Use this page as a quick guide to the current NutriBite workflow."
                            Style="{StaticResource BodyText}" />
                 </VerticalStackLayout>
             </Border>
@@ -29,11 +31,11 @@
                                Style="{StaticResource TitleText}"
                                TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentA}}"
                                SemanticProperties.HeadingLevel="Level2" />
-                        <Label Text="Search by name, category, description, or tag. Use category and favorite filters to narrow the list."
+                        <Label Text="Search by name, category, description, or tag. Use the category picker and Favorites switch to narrow the list."
                                Style="{StaticResource BodyText}" />
-                        <Label Text="Swipe a food card to add or remove it from favorites, then open Details for nutrition summaries."
+                        <Label Text="Tap a food card, or its Details button, to open nutrition details."
                                Style="{StaticResource BodyText}" />
-                        <Label Text="Use pull-to-refresh after changing remote data, then add a new record when the meal is missing."
+                        <Label Text="Pull to refresh to reload the remote catalogue into local SQLite, then add a new record when a meal is missing."
                                Style="{StaticResource BodyText}" />
                     </VerticalStackLayout>
                 </Border>
@@ -46,11 +48,11 @@
                                Style="{StaticResource TitleText}"
                                TextColor="{AppThemeBinding Light={StaticResource AccentFreshL}, Dark={StaticResource AccentFresh}}"
                                SemanticProperties.HeadingLevel="Level2" />
-                        <Label Text="Capture a food photo to run on-device MobileNet recognition, then read the result aloud."
+                        <Label Text="Take a camera photo or choose one from the gallery to run on-device MobileNet recognition, then read the result aloud."
                                Style="{StaticResource BodyText}" />
                         <Label Text="Load location to show country, city, region, and coordinates for the meal context."
                                Style="{StaticResource BodyText}" />
-                        <Label Text="Use emulator virtual sensors for accelerometer, compass, and gyroscope. Use a real device for flashlight and haptics."
+                        <Label Text="Use emulator virtual sensors for accelerometer, compass, and gyroscope. Flashlight and haptic feedback are best verified on a real device."
                                Style="{StaticResource BodyText}" />
                         <Label Text="Enable shake-to-suggest, move the device, and listen for a random catalogue meal suggestion."
                                Style="{StaticResource BodyText}" />
@@ -66,7 +68,9 @@
                            SemanticProperties.HeadingLevel="Level2" />
                     <Label Text="Complete every required form field with realistic calories and macronutrients before saving."
                            Style="{StaticResource BodyText}" />
-                    <Label Text="Open Details to review calories, macro ratios, allergy notes, speech playback, edit flow, and vibration reminder."
+                    <Label Text="Open Details to review calories, macro ratios, allergy notes, speech playback, edit flow, Favourite, Delete, and vibration reminder."
+                           Style="{StaticResource BodyText}" />
+                    <Label Text="Use the Favourite button on Details to add or remove a record from Favorites. Use Delete on Details to confirm removal from SQLite."
                            Style="{StaticResource BodyText}" />
                 </VerticalStackLayout>
             </Border>
@@ -81,16 +85,17 @@
                            Style="{StaticResource BodyText}" />
                     <Label Text="Use a screen reader to confirm headings, hints, action descriptions, dynamic status messages, and error recovery are clear."
                            Style="{StaticResource BodyText}" />
-                    <Label Text="Check phone portrait, phone landscape, tablet, and large-text layouts before recording the final screencast."
+                    <Label Text="Check phone portrait, phone landscape, tablet, and large-text layouts before the final review."
                            Style="{StaticResource BodyText}" />
                 </VerticalStackLayout>
             </Border>
 
-            <Grid ColumnDefinitions="{OnIdiom Phone='*', Tablet='*,*', Desktop='*,*'}"
-                  RowDefinitions="{OnIdiom Phone='Auto,Auto', Tablet='Auto', Desktop='Auto'}"
+            <Grid ColumnDefinitions="{OnIdiom Phone='*', Tablet='*,*,*', Desktop='*,*,*'}"
+                  RowDefinitions="{OnIdiom Phone='Auto,Auto,Auto', Tablet='Auto', Desktop='Auto'}"
                   ColumnSpacing="12"
                   RowSpacing="10">
-                <Button Text="Read help"
+                <Button x:Name="ReadHelpButton"
+                        Text="Read help"
                         Background="{StaticResource FreshBrush}"
                         TextColor="{AppThemeBinding Light={StaticResource TextPrimaryL}, Dark={StaticResource BgBase}}"
                         Clicked="OnReadHelpClicked"
@@ -98,6 +103,18 @@
                         SemanticProperties.Hint="Read the main help instructions aloud" />
                 <Button Grid.Row="{OnIdiom Phone=1, Tablet=0, Desktop=0}"
                         Grid.Column="{OnIdiom Phone=0, Tablet=1, Desktop=1}"
+                        x:Name="StopHelpButton"
+                        Text="Stop reading"
+                        IsEnabled="False"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Surface1L}, Dark={StaticResource Surface2}}"
+                        BorderColor="{AppThemeBinding Light={StaticResource HairlineL}, Dark={StaticResource Hairline}}"
+                        BorderWidth="1"
+                        TextColor="{AppThemeBinding Light={StaticResource AccentTextL}, Dark={StaticResource AccentB}}"
+                        Clicked="OnStopHelpClicked"
+                        SemanticProperties.Description="Stop reading help"
+                        SemanticProperties.Hint="Stop the current spoken help instructions" />
+                <Button Grid.Row="{OnIdiom Phone=2, Tablet=0, Desktop=0}"
+                        Grid.Column="{OnIdiom Phone=0, Tablet=2, Desktop=2}"
                         Text="Test error"
                         BackgroundColor="{AppThemeBinding Light={StaticResource Surface1L}, Dark={StaticResource Surface2}}"
                         BorderColor="{AppThemeBinding Light={StaticResource HairlineL}, Dark={StaticResource Hairline}}"

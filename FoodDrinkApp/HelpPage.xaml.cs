@@ -4,6 +4,9 @@ namespace FoodDrinkApp;
 
 public partial class HelpPage : ContentPage
 {
+    private int speechRequestVersion;
+    private bool isReadingHelp;
+
     public HelpPage()
     {
         InitializeComponent();
@@ -15,19 +18,57 @@ public partial class HelpPage : ContentPage
         AccessibilityService.ApplyFontScale(this);
     }
 
+    protected override void OnDisappearing()
+    {
+        speechRequestVersion++;
+        SpeechService.Stop();
+        SetSpeechButtonState(false);
+        base.OnDisappearing();
+    }
+
     private async void OnReadHelpClicked(object? sender, EventArgs e)
     {
+        var requestVersion = ++speechRequestVersion;
+        var wasReading = isReadingHelp;
+
         try
         {
-            const string helpText = "Search and filter foods, swipe cards to manage favorites, add or edit records with realistic nutrition values, open details for macro summaries, capture a food photo for on-device recognition, load location, use sensors on the hardware tab, enable shake suggestions, and set theme plus text size up to two hundred percent in settings.";
+            var helpText = BuildHelpNarrationText();
+            if (string.IsNullOrWhiteSpace(helpText))
+            {
+                SetStatus("There is no help text to read right now.");
+                return;
+            }
+
+            SetSpeechButtonState(true);
+            SetStatus(wasReading ? "Restarting help instructions aloud." : "Reading help instructions aloud.");
             await SpeechService.SpeakAsync(helpText);
-            SetStatus("Reading help instructions aloud.");
+
+            if (requestVersion == speechRequestVersion && isReadingHelp)
+            {
+                SetStatus("Finished reading help instructions.");
+            }
         }
         catch (Exception ex)
         {
             AppLog.Error("Read help page aloud", ex);
             SetStatus("Help instructions could not be read aloud right now.");
         }
+        finally
+        {
+            if (requestVersion == speechRequestVersion)
+            {
+                SetSpeechButtonState(false);
+            }
+        }
+    }
+
+    private void OnStopHelpClicked(object? sender, EventArgs e)
+    {
+        speechRequestVersion++;
+        SpeechService.Stop();
+        SetSpeechButtonState(false);
+        SetStatus("Reading stopped.");
     }
 
     private void OnTestErrorClicked(object? sender, EventArgs e)
@@ -47,5 +88,59 @@ public partial class HelpPage : ContentPage
     {
         HelpStatusLabel.Text = message;
         SemanticScreenReader.Announce(message);
+    }
+
+    private void SetSpeechButtonState(bool isReading)
+    {
+        isReadingHelp = isReading;
+        ReadHelpButton.Text = isReading ? "Restart help" : "Read help";
+        StopHelpButton.IsEnabled = isReading;
+        SemanticProperties.SetDescription(ReadHelpButton, isReading ? "Restart help" : "Read help");
+        SemanticProperties.SetHint(ReadHelpButton, isReading
+            ? "Restart the spoken help instructions from the beginning"
+            : "Read the main help instructions aloud");
+    }
+
+    private string BuildHelpNarrationText()
+    {
+        var textParts = new List<string>();
+        CollectLabelText(HelpContentLayout, textParts);
+        return string.Join(" ", textParts);
+    }
+
+    private void CollectLabelText(Element element, ICollection<string> textParts)
+    {
+        if (ReferenceEquals(element, HelpStatusLabel))
+        {
+            return;
+        }
+
+        if (element is Label { Text: { } text } && !string.IsNullOrWhiteSpace(text))
+        {
+            textParts.Add(text.Trim());
+        }
+
+        if (element is Border { Content: Element borderContent })
+        {
+            CollectLabelText(borderContent, textParts);
+            return;
+        }
+
+        if (element is ScrollView { Content: Element scrollContent })
+        {
+            CollectLabelText(scrollContent, textParts);
+            return;
+        }
+
+        if (element is Layout layout)
+        {
+            foreach (var child in layout.Children)
+            {
+                if (child is Element childElement)
+                {
+                    CollectLabelText(childElement, textParts);
+                }
+            }
+        }
     }
 }
