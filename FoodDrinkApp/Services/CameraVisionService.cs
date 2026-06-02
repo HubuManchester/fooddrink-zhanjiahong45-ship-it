@@ -32,6 +32,15 @@ public sealed class CameraVisionService
     }
 
     /// <summary>
+    /// Picks an existing photo from the gallery and returns its bytes, or null when the user cancels.
+    /// </summary>
+    public async Task<byte[]?> PickPhotoAsync()
+    {
+        var photo = await MediaPicker.Default.PickPhotoAsync();
+        return photo is null ? null : await ReadImageBytesAsync(photo);
+    }
+
+    /// <summary>
     /// Classifies image bytes with the cached bundled ONNX model.
     /// </summary>
     public async Task<Prediction> ClassifyAsync(byte[] imageBytes, CancellationToken cancellationToken = default)

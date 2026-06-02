@@ -93,7 +93,9 @@ public sealed class FoodVisionService : IDisposable
         }
 
         using var image = Image.Load<Rgb24>(imageBytes);
-        image.Mutate(context => context.Resize(new ResizeOptions
+        image.Mutate(context => context
+            .AutoOrient()
+            .Resize(new ResizeOptions
         {
             Size = new Size(size, size),
             Mode = ResizeMode.Crop

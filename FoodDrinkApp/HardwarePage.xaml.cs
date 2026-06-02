@@ -1,5 +1,7 @@
 using FoodDrinkApp.Services;
+using Microsoft.ML.OnnxRuntime;
 using Microsoft.Maui.Devices.Sensors;
+using SixLabors.ImageSharp;
 
 namespace FoodDrinkApp;
 
@@ -34,41 +36,135 @@ public partial class HardwarePage : ContentPage
 
     private async void OnTakePhotoClicked(object? sender, EventArgs e)
     {
+        const string takePhoto = "Take a photo";
+        const string chooseFromGallery = "Choose from gallery";
+
         try
         {
-            if (!cameraVisionService.IsCaptureSupported)
+            var choice = await DisplayActionSheet("Add a food photo", "Cancel", null, takePhoto, chooseFromGallery);
+            switch (choice)
             {
-                SetStatus("This device does not support camera capture.");
+                case takePhoto:
+                    await CaptureFoodPhotoAsync();
+                    break;
+                case chooseFromGallery:
+                    await PickFoodPhotoAsync();
+                    break;
+                default:
+                    SetStatus("No photo selected.");
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("Open food photo action sheet", ex);
+            SetStatus("Photo options could not be opened right now.");
+        }
+    }
+
+    private async Task CaptureFoodPhotoAsync()
+    {
+        if (!cameraVisionService.IsCaptureSupported)
+        {
+            SetStatus("This device does not support camera capture. Choose from gallery instead.");
+            return;
+        }
+
+        try
+        {
+            var permission = await Permissions.RequestAsync<Permissions.Camera>();
+            if (permission != PermissionStatus.Granted)
+            {
+                SetStatus("Camera permission was denied. Choose from gallery or enable camera access in device settings.");
                 return;
             }
 
-            var imageBytes = await cameraVisionService.CapturePhotoAsync();
-            if (imageBytes is null)
-            {
-                SetStatus("Photo capture cancelled.");
-                return;
-            }
+            SetStatus("Opening camera...");
+            await LoadAndClassifyPhotoAsync(
+                cameraVisionService.CapturePhotoAsync,
+                "Food photo captured. Running on-device recognition...");
+        }
+        catch (PermissionException ex)
+        {
+            AppLog.Error("Request camera permission", ex);
+            SetStatus("Camera permission was denied. Choose from gallery or enable camera access in device settings.");
+        }
+        catch (FeatureNotSupportedException ex)
+        {
+            AppLog.Error("Capture food photo", ex);
+            SetStatus("This device does not support camera capture. Choose from gallery instead.");
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("Capture food photo", ex);
+            SetStatus("Camera capture could not be completed right now. Choose from gallery instead.");
+        }
+    }
 
-            FoodPhoto.Source = ImageSource.FromStream(() => new MemoryStream(imageBytes));
-            HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+    private async Task PickFoodPhotoAsync()
+    {
+        try
+        {
+            SetStatus("Opening gallery...");
+            await LoadAndClassifyPhotoAsync(
+                cameraVisionService.PickPhotoAsync,
+                "Food photo selected. Running on-device recognition...");
+        }
+        catch (FeatureNotSupportedException ex)
+        {
+            AppLog.Error("Pick food photo from gallery", ex);
+            SetStatus("Photo gallery selection is not available on this device.");
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("Pick food photo from gallery", ex);
+            SetStatus("Photo gallery selection could not be completed right now.");
+        }
+    }
 
-            PredictionLabel.Text = "Classifying food photo...";
-            ReadPredictionButton.IsEnabled = false;
-            SetStatus("Food photo captured. Running on-device recognition...");
+    private async Task LoadAndClassifyPhotoAsync(Func<Task<byte[]?>> loadPhotoAsync, string recognitionStatus)
+    {
+        var imageBytes = await loadPhotoAsync();
+        if (imageBytes is null)
+        {
+            SetStatus("No photo selected.");
+            return;
+        }
 
+        FoodPhoto.Source = ImageSource.FromStream(() => new MemoryStream(imageBytes));
+        HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+
+        latestPrediction = null;
+        PredictionLabel.Text = "Classifying food photo...";
+        ReadPredictionButton.IsEnabled = false;
+        SetStatus(recognitionStatus);
+
+        try
+        {
             latestPrediction = await cameraVisionService.ClassifyAsync(imageBytes);
             PredictionLabel.Text = $"Food recognition: {latestPrediction.Label} ({latestPrediction.Confidence:P0})";
             ReadPredictionButton.IsEnabled = true;
             SetStatus("Food recognition completed.");
         }
-        catch (PermissionException)
-        {
-            SetStatus("Camera permission was denied. Enable camera access in device settings.");
-        }
         catch (FileNotFoundException ex)
         {
             AppLog.Error("Load food recognition assets", ex);
             SetStatus("Food recognition assets are missing from this app build.");
+        }
+        catch (UnknownImageFormatException ex)
+        {
+            AppLog.Error("Decode selected food photo", ex);
+            SetStatus("The selected file is not a supported image.");
+        }
+        catch (InvalidImageContentException ex)
+        {
+            AppLog.Error("Decode selected food photo", ex);
+            SetStatus("The selected image could not be decoded. Try a different JPEG or PNG.");
+        }
+        catch (OnnxRuntimeException ex)
+        {
+            AppLog.Error("Run food recognition inference", ex);
+            SetStatus("Food recognition inference could not run on this device right now.");
         }
         catch (InvalidOperationException ex)
         {
@@ -77,8 +173,8 @@ public partial class HardwarePage : ContentPage
         }
         catch (Exception ex)
         {
-            AppLog.Error("Capture or classify food photo", ex);
-            SetStatus("Camera capture or food recognition could not be completed right now.");
+            AppLog.Error("Classify food photo", ex);
+            SetStatus("Food recognition could not be completed right now.");
         }
     }
 

@@ -29,8 +29,8 @@
                         <Button Grid.Column="1"
                                 Text="Photo"
                                 Clicked="OnTakePhotoClicked"
-                                SemanticProperties.Description="Capture food photo"
-                                SemanticProperties.Hint="Open the camera to capture a food image" />
+                                SemanticProperties.Description="Add food photo"
+                                SemanticProperties.Hint="Take a photo or choose a food image from the gallery" />
                     </Grid>
                     <Border StrokeThickness="0"
                             BackgroundColor="{AppThemeBinding Light={StaticResource Surface2L}, Dark={StaticResource Surface2}}"
