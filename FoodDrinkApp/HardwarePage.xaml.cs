@@ -13,6 +13,7 @@ public partial class HardwarePage : ContentPage
     private readonly FlashlightService flashlightService = new();
     private readonly LocationLookupService locationLookupService = new();
     private readonly SensorMonitorService sensorMonitor = new();
+    private readonly ShakeSuggestionDetector shakeSuggestionDetector = new();
     private readonly SemaphoreSlim shakeSuggestionGate = new(1, 1);
     private Prediction? latestPrediction;
     private readonly Random suggestionRandom = new();
@@ -392,13 +393,16 @@ public partial class HardwarePage : ContentPage
 
             if (!sensorMonitor.ShakeSuggestionEnabled)
             {
-                sensorMonitor.StartShakeSuggestion(OnShakeDetected);
+                shakeSuggestionDetector.Reset();
+                lastShakeSuggestionAt = DateTimeOffset.MinValue;
+                sensorMonitor.StartShakeSuggestion(OnShakeReadingChanged);
                 ShakeButton.Text = "Disable";
-                SetStatus("Shake suggestions enabled. Shake the device to pick a meal.");
+                SetStatus("Shake suggestions enabled. Shake the device or move the emulator accelerometer to pick a meal.");
             }
             else
             {
-                sensorMonitor.StopShakeSuggestion(OnShakeDetected);
+                sensorMonitor.StopShakeSuggestion(OnShakeReadingChanged);
+                shakeSuggestionDetector.Reset();
                 ShakeButton.Text = "Enable";
                 SetStatus("Shake suggestions disabled.");
             }
@@ -414,7 +418,15 @@ public partial class HardwarePage : ContentPage
         }
     }
 
-    private async void OnShakeDetected(object? sender, EventArgs e)
+    private void OnShakeReadingChanged(object? sender, AccelerometerChangedEventArgs e)
+    {
+        if (shakeSuggestionDetector.ShouldSuggest(e.Reading.Acceleration))
+        {
+            _ = ShowShakeSuggestionAsync();
+        }
+    }
+
+    private async Task ShowShakeSuggestionAsync()
     {
         if (!shakeSuggestionGate.Wait(0))
         {
@@ -496,7 +508,7 @@ public partial class HardwarePage : ContentPage
         {
             sensorMonitor.StopAll(
                 OnAccelerometerReadingChanged,
-                OnShakeDetected,
+                OnShakeReadingChanged,
                 OnCompassReadingChanged,
                 OnGyroscopeReadingChanged);
         }
@@ -509,6 +521,7 @@ public partial class HardwarePage : ContentPage
         CompassButton.Text = "Start";
         GyroscopeButton.Text = "Start";
         ShakeButton.Text = "Enable";
+        shakeSuggestionDetector.Reset();
     }
 
     private void OnStopSpeechClicked(object? sender, EventArgs e)

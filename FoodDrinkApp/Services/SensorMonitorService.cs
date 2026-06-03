@@ -99,11 +99,11 @@ public sealed class SensorMonitorService
     }
 
     /// <summary>
-    /// Starts shake detection and shares the accelerometer with the live readout.
+    /// Starts shake detection from accelerometer readings and shares the accelerometer with the live readout.
     /// </summary>
-    public void StartShakeSuggestion(EventHandler handler)
+    public void StartShakeSuggestion(EventHandler<AccelerometerChangedEventArgs> handler)
     {
-        Accelerometer.Default.ShakeDetected += handler;
+        Accelerometer.Default.ReadingChanged += handler;
         ShakeSuggestionEnabled = true;
         EnsureAccelerometerRunning();
     }
@@ -111,9 +111,9 @@ public sealed class SensorMonitorService
     /// <summary>
     /// Stops shake detection and stops the accelerometer if no readout remains active.
     /// </summary>
-    public void StopShakeSuggestion(EventHandler handler)
+    public void StopShakeSuggestion(EventHandler<AccelerometerChangedEventArgs> handler)
     {
-        Accelerometer.Default.ShakeDetected -= handler;
+        Accelerometer.Default.ReadingChanged -= handler;
         ShakeSuggestionEnabled = false;
         StopAccelerometerIfUnused();
     }
@@ -123,7 +123,7 @@ public sealed class SensorMonitorService
     /// </summary>
     public void StopAll(
         EventHandler<AccelerometerChangedEventArgs> accelerometerHandler,
-        EventHandler shakeHandler,
+        EventHandler<AccelerometerChangedEventArgs> shakeHandler,
         EventHandler<CompassChangedEventArgs> compassHandler,
         EventHandler<GyroscopeChangedEventArgs> gyroscopeHandler)
     {
@@ -135,7 +135,7 @@ public sealed class SensorMonitorService
 
         if (ShakeSuggestionEnabled)
         {
-            Accelerometer.Default.ShakeDetected -= shakeHandler;
+            Accelerometer.Default.ReadingChanged -= shakeHandler;
             ShakeSuggestionEnabled = false;
         }
 

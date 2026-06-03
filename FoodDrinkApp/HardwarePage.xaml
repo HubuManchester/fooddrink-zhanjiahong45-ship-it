@@ -204,11 +204,11 @@
                                 Text="Enable"
                                 Clicked="OnToggleShakeSuggestionClicked"
                                 SemanticProperties.Description="Enable or disable shake meal suggestions"
-                                SemanticProperties.Hint="Shake the device to choose a random meal suggestion" />
+                                SemanticProperties.Hint="Shake the device or move the emulator accelerometer to choose a random meal suggestion" />
                         <Label x:Name="ShakeSuggestionLabel"
                                Grid.Row="1"
                                Grid.ColumnSpan="2"
-                               Text="Enable shake suggestions, then shake the device."
+                               Text="Enable shake suggestions, then shake the device or move the emulator accelerometer."
                                Style="{StaticResource TelemetryText}"
                                SemanticProperties.Description="Latest shake meal suggestion" />
                     </Grid>
