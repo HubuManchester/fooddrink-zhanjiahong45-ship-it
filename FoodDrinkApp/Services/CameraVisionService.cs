@@ -22,8 +22,12 @@ public sealed class CameraVisionService
     /// </summary>
     public async Task<byte[]?> CapturePhotoAsync()
     {
+#if ANDROID
+        return await AndroidCameraCaptureService.CapturePhotoAsync();
+#else
         var photo = await MediaPicker.Default.CapturePhotoAsync();
         return photo is null ? null : await ReadImageBytesAsync(photo);
+#endif
     }
 
     /// <summary>
