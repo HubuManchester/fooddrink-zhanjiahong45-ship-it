@@ -3,15 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="FoodDrinkApp.FoodDetailPage"
              Title="Nutrition Details">
-    <ScrollView SemanticProperties.Hint="Swipe left or right to move between items.">
-        <ScrollView.GestureRecognizers>
-            <SwipeGestureRecognizer Direction="Left"
-                                    Threshold="80"
-                                    Swiped="OnDetailSwiped" />
-            <SwipeGestureRecognizer Direction="Right"
-                                    Threshold="80"
-                                    Swiped="OnDetailSwiped" />
-        </ScrollView.GestureRecognizers>
+    <ScrollView>
         <ScrollView.Background>
             <StaticResource Key="PageBackgroundBrush" />
         </ScrollView.Background>

@@ -155,14 +155,14 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:FoodItem">
                         <Border Style="{StaticResource FoodListCard}"
-                                SemanticProperties.Hint="Tap to open nutrition details. Press and hold for favourite and delete quick actions.">
+                                SemanticProperties.Hint="Tap to open nutrition details. Double-tap to toggle favourite.">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnFoodCardTapped"
+                                                      NumberOfTapsRequired="1"
                                                       CommandParameter="{Binding Id}" />
-                                <PointerGestureRecognizer PointerPressed="OnFoodCardPointerPressed"
-                                                          PointerPressedCommandParameter="{Binding Id}"
-                                                          PointerReleased="OnFoodCardPointerReleased"
-                                                          PointerExited="OnFoodCardPointerReleased" />
+                                <TapGestureRecognizer Tapped="OnFoodCardDoubleTapped"
+                                                      NumberOfTapsRequired="2"
+                                                      CommandParameter="{Binding Id}" />
                             </Border.GestureRecognizers>
                             <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="7" ColumnSpacing="10">
                                 <Label Text="{Binding Name}"
