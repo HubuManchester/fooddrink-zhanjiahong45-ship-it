@@ -7,13 +7,17 @@ namespace FoodDrinkApp;
 
 public partial class HardwarePage : ContentPage
 {
+    private static readonly TimeSpan ShakeSuggestionCooldown = TimeSpan.FromSeconds(2);
     private int feedbackTestCount;
     private readonly CameraVisionService cameraVisionService = new();
     private readonly FlashlightService flashlightService = new();
     private readonly LocationLookupService locationLookupService = new();
     private readonly SensorMonitorService sensorMonitor = new();
+    private readonly SemaphoreSlim shakeSuggestionGate = new(1, 1);
     private Prediction? latestPrediction;
     private readonly Random suggestionRandom = new();
+    private DateTimeOffset lastShakeSuggestionAt = DateTimeOffset.MinValue;
+    private bool? wideHardwareLayoutApplied;
 
     public HardwarePage()
     {
@@ -24,6 +28,13 @@ public partial class HardwarePage : ContentPage
     {
         base.OnAppearing();
         AccessibilityService.ApplyFontScale(this);
+        ApplyHardwareLayout(Width, Height);
+    }
+
+    protected override void OnSizeAllocated(double width, double height)
+    {
+        base.OnSizeAllocated(width, height);
+        ApplyHardwareLayout(width, height);
     }
 
     protected override void OnDisappearing()
@@ -405,20 +416,58 @@ public partial class HardwarePage : ContentPage
 
     private async void OnShakeDetected(object? sender, EventArgs e)
     {
+        if (!shakeSuggestionGate.Wait(0))
+        {
+            return;
+        }
+
         try
         {
-            var items = await FoodCatalogService.SearchAsync(null);
+            var now = DateTimeOffset.UtcNow;
+            if (now - lastShakeSuggestionAt < ShakeSuggestionCooldown)
+            {
+                return;
+            }
+
+            lastShakeSuggestionAt = now;
+            await MainThread.InvokeOnMainThreadAsync(() =>
+            {
+                SetStatus("Choosing a meal suggestion...");
+            });
+
+            var repository = await AppDataService.GetRepositoryAsync();
+            var items = await repository.GetAllAsync();
+            if (items.Count == 0)
+            {
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    SetStatus("No saved foods are available for shake suggestions yet.");
+                });
+                return;
+            }
+
             var suggestion = MealSuggestionService.PickRandom(items, suggestionRandom);
             var text = $"Shake suggestion: {suggestion.Name} ({suggestion.CaloriesLabel})";
 
-            ShakeSuggestionLabel.Text = text;
-            SetStatus(text);
-            await SpeechService.SpeakAsync($"Try {suggestion.Name}.");
+            await MainThread.InvokeOnMainThreadAsync(() =>
+            {
+                ShakeSuggestionLabel.Text = text;
+                SetStatus(text);
+            });
+
+            await MainThread.InvokeOnMainThreadAsync(() => SpeechService.SpeakAsync($"Try {suggestion.Name}."));
         }
         catch (Exception ex)
         {
             AppLog.Error("Select shake meal suggestion", ex);
-            SetStatus("A meal suggestion could not be selected right now.");
+            await MainThread.InvokeOnMainThreadAsync(() =>
+            {
+                SetStatus("A meal suggestion could not be selected right now.");
+            });
+        }
+        finally
+        {
+            shakeSuggestionGate.Release();
         }
     }
 
@@ -517,5 +566,59 @@ public partial class HardwarePage : ContentPage
         PredictionLabel.Text = message;
         ReadPredictionButton.IsEnabled = false;
         SetStatus(message);
+    }
+
+    private void ApplyHardwareLayout(double width, double height)
+    {
+        if (width <= 0 || height <= 0)
+        {
+            return;
+        }
+
+        var useWideLayout = width >= 700 && width > height;
+        if (wideHardwareLayoutApplied == useWideLayout)
+        {
+            return;
+        }
+
+        wideHardwareLayoutApplied = useWideLayout;
+        HardwareSectionsGrid.ColumnDefinitions.Clear();
+        HardwareSectionsGrid.RowDefinitions.Clear();
+
+        if (useWideLayout)
+        {
+            HardwareSectionsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
+            HardwareSectionsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
+            HardwareSectionsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            HardwareSectionsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            HardwareSectionsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+            SetHardwareSectionPosition(PhotoCard, 0, 0);
+            SetHardwareSectionPosition(LocationCard, 1, 0);
+            SetHardwareSectionPosition(SensorsCard, 0, 1, rowSpan: 2);
+            SetHardwareSectionPosition(FlashShakeCard, 2, 0, columnSpan: 2);
+            FoodPhotoFrame.HeightRequest = 160;
+            return;
+        }
+
+        HardwareSectionsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
+        for (var row = 0; row < 4; row++)
+        {
+            HardwareSectionsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        }
+
+        SetHardwareSectionPosition(PhotoCard, 0, 0);
+        SetHardwareSectionPosition(LocationCard, 1, 0);
+        SetHardwareSectionPosition(SensorsCard, 2, 0);
+        SetHardwareSectionPosition(FlashShakeCard, 3, 0);
+        FoodPhotoFrame.HeightRequest = 220;
+    }
+
+    private static void SetHardwareSectionPosition(View section, int row, int column, int rowSpan = 1, int columnSpan = 1)
+    {
+        Grid.SetRow(section, row);
+        Grid.SetColumn(section, column);
+        Grid.SetRowSpan(section, rowSpan);
+        Grid.SetColumnSpan(section, columnSpan);
     }
 }

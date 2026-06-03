@@ -8,7 +8,9 @@
             <StaticResource Key="PageBackgroundBrush" />
         </ScrollView.Background>
 
-        <VerticalStackLayout Padding="{OnIdiom Phone='20,18,20,24', Tablet='34,26,34,30', Desktop='42,28,42,34'}" Spacing="16">
+        <VerticalStackLayout x:Name="HardwareLayout"
+                             Padding="{OnIdiom Phone='20,18,20,24', Tablet='34,26,34,30', Desktop='42,28,42,34'}"
+                             Spacing="16">
             <Border Style="{StaticResource HeroCard}">
                 <VerticalStackLayout Spacing="6">
                     <Label Text="Mobile hardware"
@@ -19,7 +21,14 @@
                 </VerticalStackLayout>
             </Border>
 
-            <Border Style="{StaticResource GlassCard}">
+            <Grid x:Name="HardwareSectionsGrid"
+                  RowDefinitions="Auto,Auto,Auto,Auto"
+                  ColumnDefinitions="*"
+                  RowSpacing="16"
+                  ColumnSpacing="16">
+            <Border x:Name="PhotoCard"
+                    Grid.Row="0"
+                    Style="{StaticResource GlassCard}">
                 <VerticalStackLayout Spacing="14">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                         <VerticalStackLayout Spacing="3">
@@ -32,7 +41,8 @@
                                 SemanticProperties.Description="Add food photo"
                                 SemanticProperties.Hint="Take a photo or choose a food image from the gallery" />
                     </Grid>
-                    <Border StrokeThickness="0"
+                    <Border x:Name="FoodPhotoFrame"
+                            StrokeThickness="0"
                             BackgroundColor="{AppThemeBinding Light={StaticResource Surface2L}, Dark={StaticResource Surface2}}"
                             HeightRequest="220">
                         <Border.StrokeShape>
@@ -59,7 +69,9 @@
                 </VerticalStackLayout>
             </Border>
 
-            <Border Style="{StaticResource GlassCard}">
+            <Border x:Name="LocationCard"
+                    Grid.Row="1"
+                    Style="{StaticResource GlassCard}">
                 <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                         <VerticalStackLayout Spacing="3">
@@ -87,7 +99,9 @@
                 </Grid>
             </Border>
 
-            <Border Style="{StaticResource GlassCard}">
+            <Border x:Name="SensorsCard"
+                    Grid.Row="2"
+                    Style="{StaticResource GlassCard}">
                 <VerticalStackLayout Spacing="14">
                     <VerticalStackLayout Spacing="3">
                         <Label Text="Live Sensors"
@@ -158,7 +172,9 @@
                 </VerticalStackLayout>
             </Border>
 
-            <Border Style="{StaticResource GlassCard}">
+            <Border x:Name="FlashShakeCard"
+                    Grid.Row="3"
+                    Style="{StaticResource GlassCard}">
                 <VerticalStackLayout Spacing="14">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                         <VerticalStackLayout Spacing="3">
@@ -198,6 +214,7 @@
                     </Grid>
                 </VerticalStackLayout>
             </Border>
+            </Grid>
 
             <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                 <Button Text="Read help"
