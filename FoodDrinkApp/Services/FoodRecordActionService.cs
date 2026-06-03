@@ -20,7 +20,7 @@ public static class FoodRecordActionService
         try
         {
             var repository = await AppDataService.GetRepositoryAsync();
-            await repository.UpdateAsync(item);
+            await repository.UpdateFavoriteAsync(item);
             return item.IsFavorite;
         }
         catch

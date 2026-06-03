@@ -83,6 +83,18 @@ public sealed class FoodItem
     public bool IsFavorite { get; set; }
 
     /// <summary>
+    /// Gets or sets whether the record has local user edits that should not be overwritten by catalogue sync.
+    /// </summary>
+    [JsonIgnore]
+    public bool IsUserModified { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether the record was deleted locally and should stay hidden from catalogue sync.
+    /// </summary>
+    [JsonIgnore]
+    public bool IsDeleted { get; set; }
+
+    /// <summary>
     /// Gets calories formatted for compact UI labels.
     /// </summary>
     [JsonIgnore]

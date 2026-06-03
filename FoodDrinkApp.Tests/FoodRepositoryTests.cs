@@ -156,6 +156,93 @@ public sealed class FoodRepositoryTests
     }
 
     [Fact]
+    public async Task Import_preserves_user_modified_catalogue_records()
+    {
+        var dbPath = CreateTempDatabasePath();
+        var repository = new FoodRepository();
+        try
+        {
+            await repository.InitAsync(dbPath, [SampleItem("remote-1", "Original Remote Item", "Lunch", "original")]);
+
+            var localEdit = await repository.GetByIdAsync("remote-1");
+            Assert.NotNull(localEdit);
+            localEdit!.Name = "My Edited Item";
+            localEdit.Category = "Custom";
+            localEdit.Calories = 777;
+            await repository.UpdateAsync(localEdit);
+
+            await repository.ImportAsync([SampleItem("remote-1", "Server Item", "Dinner", "server")]);
+
+            var reloaded = await repository.GetByIdAsync("remote-1");
+            Assert.NotNull(reloaded);
+            Assert.Equal("My Edited Item", reloaded!.Name);
+            Assert.Equal("Custom", reloaded.Category);
+            Assert.Equal(777, reloaded.Calories);
+            Assert.True(reloaded.IsUserModified);
+        }
+        finally
+        {
+            await repository.CloseAsync();
+            DeleteTempDatabase(dbPath);
+        }
+    }
+
+    [Fact]
+    public async Task Import_keeps_locally_deleted_catalogue_records_hidden()
+    {
+        var dbPath = CreateTempDatabasePath();
+        var repository = new FoodRepository();
+        try
+        {
+            await repository.InitAsync(dbPath, [SampleItem("remote-1", "Remote Item", "Lunch", "remote")]);
+
+            Assert.True(await repository.DeleteByIdAsync("remote-1"));
+            Assert.Null(await repository.GetByIdAsync("remote-1"));
+            Assert.Equal(0, await repository.CountAsync());
+
+            await repository.ImportAsync([SampleItem("remote-1", "Remote Item Restored", "Dinner", "remote")]);
+
+            Assert.Null(await repository.GetByIdAsync("remote-1"));
+            Assert.Empty(await repository.GetAllAsync());
+        }
+        finally
+        {
+            await repository.CloseAsync();
+            DeleteTempDatabase(dbPath);
+        }
+    }
+
+    [Fact]
+    public async Task UpdateFavoriteAsync_preserves_favourite_without_blocking_catalogue_updates()
+    {
+        var dbPath = CreateTempDatabasePath();
+        var repository = new FoodRepository();
+        try
+        {
+            await repository.InitAsync(dbPath, [SampleItem("remote-1", "Original Remote Item", "Lunch", "original")]);
+
+            var item = await repository.GetByIdAsync("remote-1");
+            Assert.NotNull(item);
+            item!.IsFavorite = true;
+            await repository.UpdateFavoriteAsync(item);
+
+            await repository.ImportAsync([SampleItem("remote-1", "Updated Remote Item", "Dinner", "updated")]);
+
+            var reloaded = await repository.GetByIdAsync("remote-1");
+            Assert.NotNull(reloaded);
+            Assert.Equal("Updated Remote Item", reloaded!.Name);
+            Assert.Equal("Dinner", reloaded.Category);
+            Assert.True(reloaded.IsFavorite);
+            Assert.False(reloaded.IsUserModified);
+        }
+        finally
+        {
+            await repository.CloseAsync();
+            DeleteTempDatabase(dbPath);
+        }
+    }
+
+    [Fact]
     public async Task Import_merges_remote_catalogue_preserving_user_items_and_favorites()
     {
         var dbPath = CreateTempDatabasePath();
@@ -166,7 +253,7 @@ public sealed class FoodRepositoryTests
 
             var existingRemoteItem = SampleItem("remote-1", "Old Remote Item", "Lunch", "old");
             existingRemoteItem.IsFavorite = true;
-            await repository.AddAsync(existingRemoteItem);
+            await repository.ImportAsync([existingRemoteItem]);
             await repository.AddAsync(SampleItem("user-added-1", "User Smoothie", "Drink", "custom local"));
 
             var updatedRemoteItem = SampleItem("remote-1", "Updated Remote Item", "Dinner", "updated remote");
